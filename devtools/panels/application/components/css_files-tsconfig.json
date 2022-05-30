@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+        "composite": true,
+        "outDir": "."
+    },
+    "files": [
+        "badge.css.js",
+        "frameDetailsReportView.css.js",
+        "originTrialTokenRows.css.js",
+        "originTrialTreeView.css.js",
+        "permissionsPolicySection.css.js",
+        "stackTraceLinkButton.css.js",
+        "stackTraceRow.css.js",
+        "trustTokensView.css.js",
+        "trustTokensViewDeleteButton.css.js"
+    ]
+}
