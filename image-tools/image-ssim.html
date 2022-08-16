@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>图片相似度对比</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"
+    />
+    <style>
+      [v-cloak] {
+        display: none;
+      }
+      #app {
+        /* min-width: 800px; */
+        /* max-width: 1300px; */
+        width: 1200px;
+        margin: auto;
+      }
+      .flex {
+        display: flex;
+      }
+      .flex > div {
+        width: 50%;
+        /* border: 1px solid #000; */
+        margin: 0 10px;
+        position: relative;
+      }
+      .el-upload-dragger {
+        width: 580px;
+        height: 326px;
+      }
+      .upload-button-wrap {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+      }
+      .el-upload-dragger .el-icon-upload {
+        margin-top: 0;
+      }
+
+      h3 {
+        text-align: center;
+      }
+      label {
+        line-height: 38px;
+      }
+      .image-slot {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        background: #f5f7fa;
+        font-size: 30px;
+        color: #909399;
+      }
+      span {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" v-cloak>
+      <div class="flex">
+        <div>
+          <el-upload
+            drag
+            multiple
+            action="http://localhost:3601/x-tiny"
+            accept="image/*"
+            :auto-upload="false"
+            :show-file-list="false"
+            :on-change="onUploaderChange1"
+          >
+            <el-image
+              v-if="imageUrl1"
+              :src="imageUrl1"
+              fit="contain"
+              style="width: 100%; height: 100%"
+            ></el-image>
+            <div v-else class="upload-button-wrap">
+              <i class="el-icon-upload"></i>
+              <div class="el-upload__text">
+                将文件拖到此处，或<em>点击上传</em>
+              </div>
+            </div>
+          </el-upload>
+          <div class="info">
+            <p>文件名：<span>{{file1.name}}</span></p>
+            <p>格式：<span>{{file1.type}}</span></p>
+            <p>分辨率：<span>{{imageWH1}}</span></p>
+            <p>大小：<span>{{prettyBytes(file1.size)}}</span></p>
+            <p>相似度：<span :style="{color:ssimColor}">{{imgSSIM}}</span></p>
+          </div>
+        </div>
+        <div>
+          <el-upload
+            drag
+            multiple
+            action="http://localhost:3601/x-tiny"
+            accept="image/*"
+            :auto-upload="false"
+            :show-file-list="false"
+            :on-change="onUploaderChange2"
+          >
+            <el-image
+              v-if="imageUrl2"
+              :src="imageUrl2"
+              fit="contain"
+              style="width: 100%; height: 100%"
+            ></el-image>
+            <div v-else class="upload-button-wrap">
+              <i class="el-icon-upload"></i>
+              <div class="el-upload__text">
+                将文件拖到此处，或<em>点击上传</em>
+              </div>
+            </div>
+          </el-upload>
+          <div class="info">
+            <p>文件名：<span>{{file2.name}}</span></p>
+            <p>格式：<span>{{file2.type}}</span></p>
+            <p>分辨率：<span>{{imageWH2}}</span></p>
+            <p>大小：<span>{{prettyBytes(file2.size)}}</span></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="https://unpkg.com/vue@2"></script>
+  <script src="https://unpkg.com/element-ui"></script>
+  <script src="https://unpkg.com/ssim.js"></script>
+  <script src="https://s0.qhres2.com/!fac91dc5/pretty-bytes.js"></script>
+  <script>
+    async function getImageData(imgUrl) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          let canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          context.drawImage(img, 0, 0);
+          const imgData = context.getImageData(0, 0, img.width, img.height);
+          resolve({
+            width: img.width,
+            height: img.height,
+            imgData,
+          });
+        };
+        img.src = imgUrl;
+      });
+    }
+
+    let files = [],
+      lastOnChangeTime = Date.now(),
+      img1Data,
+      img2Data,
+      timer;
+
+    new Vue({
+      el: '#app',
+      data: function () {
+        return {
+          file1: { imageWH: '' },
+          file2: { imageWH: '' },
+          imageUrl1: '',
+          imageUrl2: '',
+          imageWH1: '',
+          imageWH2: '',
+          ssimColor: '',
+          imgSSIM: '',
+        };
+      },
+      computed: {},
+      methods: {
+        prettyBytes(size) {
+          return size && prettyBytes(size, { binary: true });
+        },
+        onUploaderChange1(file) {
+          this.onUploaderChange(file, 1);
+        },
+        onUploaderChange2(file) {
+          this.onUploaderChange(file, 2);
+        },
+        onUploaderChange({ raw }, target) {
+          const interval = Date.now() - lastOnChangeTime;
+          lastOnChangeTime = Date.now();
+          if (interval > 100) {
+            files = [];
+          }
+          files.push(raw);
+
+          clearInterval(timer);
+          timer = setTimeout(() => {
+            this.processImgs(target);
+          }, 100);
+        },
+
+        async processImgs(target) {
+          this.imgSSIM = '---';
+
+          this[`file${target}`] = files[0];
+          await this.createBlobURL(target);
+          if (files[1]) {
+            const other = target == 1 ? 2 : 1;
+            this[`file${other}`] = files[1];
+            await this.createBlobURL(other);
+          }
+
+          this.$nextTick(() => {
+            setTimeout(() => {
+              this.calcSSIM();
+            }, 50);
+          });
+        },
+
+        async createBlobURL(target) {
+          URL.revokeObjectURL(this[`imageUrl${target}`]);
+          this[`imageUrl${target}`] = URL.createObjectURL(
+            this[`file${target}`]
+          );
+
+          const imgData = await getImageData(this[`imageUrl${target}`]);
+          Object.assign(this[`file${target}`], imgData);
+          this[`imageWH${target}`] = imgData.width + ' x ' + imgData.height;
+        },
+
+        calcSSIM() {
+          if (this.file1.imgData && this.file2.imgData) {
+            try {
+              const ssimRet = ssim.ssim(this.file1.imgData, this.file2.imgData);
+              this.ssimColor = ssimRet.mssim >= 0.998 ? '#67C23A' : '#F56C6C';
+              this.imgSSIM = (ssimRet.mssim * 100).toFixed(4) + '%';
+            } catch (ex) {
+              this.$message.error(ex);
+            }
+          }
+        },
+      },
+    });
+  </script>
+</html>

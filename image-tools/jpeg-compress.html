@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"
+    />
+    <style>
+      [v-cloak] {
+        display: none;
+      }
+      #app {
+        /* min-width: 800px; */
+        /* max-width: 1300px; */
+        width: 1200px;
+        margin: auto;
+      }
+      .flex {
+        display: flex;
+      }
+      .flex > div {
+        width: 50%;
+        /* border: 1px solid #000; */
+        margin: 0 10px;
+        position: relative;
+      }
+      .el-upload-dragger {
+        width: 580px;
+        height: 326px;
+      }
+      .upload-button-wrap {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100%;
+      }
+      .el-upload-dragger .el-icon-upload {
+        margin-top: 0;
+      }
+
+      h3 {
+        text-align: center;
+      }
+      label {
+        line-height: 38px;
+      }
+      .image-slot {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        background: #f5f7fa;
+        font-size: 30px;
+        color: #909399;
+      }
+      span {
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" v-cloak>
+      <div class="flex">
+        <div>
+          <h3>原图</h3>
+          <el-upload
+            drag
+            multiple
+            action="http://localhost:3601/x-tiny"
+            accept="image/*"
+            :auto-upload="false"
+            :show-file-list="false"
+            :on-change="onUploaderChange"
+          >
+            <el-image
+              v-if="imageUrl"
+              :src="imageUrl"
+              fit="contain"
+              style="width: 100%; height: 100%"
+            ></el-image>
+            <div v-else class="upload-button-wrap">
+              <i class="el-icon-upload"></i>
+              <div class="el-upload__text">
+                将文件拖到此处，或<em>点击上传</em>
+              </div>
+            </div>
+          </el-upload>
+          <div class="info">
+            <p>文件名：<span>{{fileName}}</span></p>
+            <p>格式：<span>{{imageType}}</span></p>
+            <p>分辨率：<span>{{imageWH}}</span></p>
+            <p>大小：<span>{{imageSize}}</span></p>
+          </div>
+        </div>
+        <div>
+          <h3>压缩后</h3>
+          <div class="el-upload-dragger">
+            <el-image
+              v-loading="loading"
+              :src="imageUrl2"
+              fit="contain"
+              style="width: 100%; height: 100%"
+              @click="openImg"
+            >
+              <div slot="error" class="image-slot">
+                <i class="el-icon-picture-outline"></i>
+              </div>
+            </el-image>
+          </div>
+          <div class="flex" style="width: 100%; margin: 5px 0 -3px">
+            <label>品质：</label>
+            <div style="width: calc(100% - 50px); margin: 0">
+              <el-slider
+                v-model="quality"
+                show-input
+                @change="compressImage"
+              ></el-slider>
+            </div>
+          </div>
+          <div class="info">
+            <p>格式：<span :style="{color:typeColor}">image/jpeg</span></p>
+            <p>分辨率：<span>{{imageWH}}</span></p>
+            <p>大小：<span>{{imageSize2}}</span></p>
+            <p>
+              压缩率：<span :style="{color:ratioColor}">{{compressRatio}}</span>
+            </p>
+            <p>相似度：<span :style="{color:ssimColor}">{{imgSSIM}}</span></p>
+            <p>
+              －－－：<span :style="{color:ssimColor2}">{{imgSSIM2}}</span>
+              <el-upload
+                style="display: inline"
+                action=""
+                accept="image/*"
+                :auto-upload="false"
+                :show-file-list="false"
+                :on-change="onSelectSSIM"
+              >
+                <el-button size="mini">对比</el-button>
+              </el-upload>
+              <span>{{ssimFileName}}</span>
+            </p>
+            <p><el-button @click="download" type="primary">下载</el-button></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+  <script src="https://unpkg.com/vue@2"></script>
+  <script src="https://unpkg.com/element-ui"></script>
+  <script src="https://unpkg.com/ssim.js"></script>
+  <script src="https://s0.qhres2.com/!fac91dc5/pretty-bytes.js"></script>
+  <script>
+    async function compressJpegBlob(imgUrl, quality) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          let canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          context.drawImage(img, 0, 0);
+          const imgData = context.getImageData(0, 0, img.width, img.height);
+          canvas.toBlob(
+            (blob) => {
+              canvas = null;
+              resolve({
+                width: img.width,
+                height: img.height,
+                blob,
+                imgData,
+              });
+            },
+            'image/jpeg',
+            quality / 100
+          );
+        };
+        img.src = imgUrl;
+      });
+    }
+    async function getImageData(imgUrl) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+          let canvas = document.createElement('canvas');
+          const context = canvas.getContext('2d');
+          canvas.width = img.width;
+          canvas.height = img.height;
+          context.drawImage(img, 0, 0);
+          const imgData = context.getImageData(0, 0, img.width, img.height);
+          resolve({
+            width: img.width,
+            height: img.height,
+            imgData,
+          });
+        };
+        img.src = imgUrl;
+      });
+    }
+
+    let files = [],
+      lastOnChangeTime = Date.now(),
+      img1Data,
+      img2Data,
+      timer;
+
+    new Vue({
+      el: '#app',
+      data: function () {
+        return {
+          loading: false,
+          imageUrl: '',
+          imageUrl2: '',
+          quality: 75,
+          imageType: '',
+          imageWH: '',
+          _imageSize: 0,
+          imageSize: '',
+          imageSize2: '',
+          compressRatio: '',
+          fileName: '',
+          ssimFileName: '',
+          ratioColor: '',
+          typeColor: '',
+          ssimColor: '',
+          imgSSIM: '',
+          ssimColor2: '',
+          imgSSIM2: '',
+        };
+      },
+      methods: {
+        onUploaderChange({ raw }) {
+          const interval = Date.now() - lastOnChangeTime;
+          lastOnChangeTime = Date.now();
+          if (interval > 100) {
+            files = [];
+          }
+          files.push(raw);
+
+          clearInterval(timer);
+          timer = setTimeout(() => {
+            this.processImgs();
+          }, 100);
+        },
+
+        async processImgs() {
+          for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            await this.showImage(file);
+          }
+        },
+
+        async showImage(file) {
+          this.fileName = file.name;
+          this.imageType = file.type;
+          this.typeColor = '';
+          if (this.imageType != 'image/jpeg') {
+            this.typeColor = '#F56C6C';
+          }
+          this._imageSize = file.size;
+          this.imageSize = prettyBytes(file.size, { binary: true });
+          URL.revokeObjectURL(this.imageUrl);
+          if (files.length == 1) {
+            URL.revokeObjectURL(this.imageUrl2);
+          }
+          this.imageUrl = URL.createObjectURL(file);
+          this.imageUrl2 = '';
+          this.imgSSIM2 = '';
+          this.ssimFileName = '';
+
+          await this.compressImage();
+        },
+
+        async compressImage(e) {
+          this.loading = true;
+          this.imageSize2 = '';
+          this.compressRatio = '';
+          this.imgSSIM = '';
+
+          const ret = await compressJpegBlob(this.imageUrl, this.quality);
+          img1Data = ret.imgData;
+          this.imageSize2 = prettyBytes(ret.blob.size, { binary: true });
+          const ratio = ret.blob.size / this._imageSize;
+          this.ratioColor = ratio < 1 ? '#67C23A' : '#F56C6C';
+          this.compressRatio = (ratio * 100).toFixed(1) + '%';
+          this.imgSSIM = '...';
+          this.imageWH = `${ret.width} x ${ret.height}`;
+          this.loading = false;
+          this.imageUrl2 = URL.createObjectURL(ret.blob);
+
+          if (files.length > 1 && e == undefined) {
+            this.download();
+          } else {
+            return new Promise((resolve) => {
+              this.$nextTick(async () => {
+                setTimeout(async () => {
+                  const ret2 = await getImageData(this.imageUrl2);
+                  img2Data = ret2.imgData;
+                  const ssimRet = ssim.ssim(img1Data, img2Data);
+                  this.ssimColor =
+                    ssimRet.mssim >= 0.998 ? '#67C23A' : '#F56C6C';
+                  this.imgSSIM = (ssimRet.mssim * 100).toFixed(4) + '%';
+                  resolve();
+                }, 50);
+              });
+            });
+          }
+        },
+
+        async onSelectSSIM({ raw }) {
+          if (!img1Data) {
+            this.$message.error('请选择原图');
+            return;
+          }
+          this.imgSSIM2 = '...';
+
+          this.ssimFileName =
+            raw.name + '，' + prettyBytes(raw.size, { binary: true });
+          const ssimImgUrl = URL.createObjectURL(raw);
+          const ret2 = await getImageData(ssimImgUrl);
+          URL.revokeObjectURL(ssimImgUrl);
+          try {
+            const ssimRet = ssim.ssim(img1Data, ret2.imgData);
+            const ssimRet2 = ssim.ssim(img2Data, ret2.imgData);
+            this.ssimColor2 = ssimRet.mssim >= 0.998 ? '#67C23A' : '#F56C6C';
+            this.imgSSIM2 =
+              (ssimRet.mssim * 100).toFixed(4) +
+              '%，' +
+              (ssimRet2.mssim * 100).toFixed(4) +
+              '%';
+          } catch (ex) {
+            this.$message.error(ex);
+          }
+        },
+
+        openImg() {
+          window.open(this.imageUrl2);
+        },
+        download() {
+          const link = document.createElement('a');
+          const filename = this.fileName.substr(
+            0,
+            this.fileName.lastIndexOf('.')
+          );
+          link.setAttribute('download', `${filename}-${this.quality}.jpg`);
+          link.href = this.imageUrl2;
+          link.click();
+        },
+      },
+    });
+  </script>
+</html>
