@@ -9,3 +9,5 @@
 [JPEG 压缩](https://panhongxue.github.io/image-tools/jpeg-compress.html)
 
 [图片相似度](https://panhongxue.github.io/image-tools/image-ssim.html)
+
+[PNG inspector](https://panhongxue.github.io/image-tools/png-file-chunk-inspector.html)
