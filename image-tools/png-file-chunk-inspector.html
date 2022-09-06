@@ -361,6 +361,7 @@
         article table {
           margin: 1.5em 0em;
           border-collapse: collapse;
+          width: 100%;
         }
         article table p {
           margin: 0em;
@@ -652,180 +653,6 @@
           padding-right: 1em;
         }
       }
-      @media print {
-        html {
-          font-family: 'Times New Roman', serif;
-          max-width: 60em;
-          margin-left: auto;
-          margin-right: auto;
-        }
-
-        body > header h1 {
-          border-bottom: 0.06em solid #000000;
-          text-align: right;
-          font-size: 80%;
-          font-weight: normal;
-        }
-        body > header a {
-          color: inherit;
-        }
-        body > header nav {
-          display: none;
-        }
-
-        h1,
-        h2,
-        h3 {
-          font-family: 'Avenir LT Std', sans-serif;
-        }
-
-        h1 {
-          margin-top: 1em;
-          margin-bottom: 1em;
-          text-align: center;
-          font-size: 140%;
-          font-weight: bold;
-        }
-
-        h2 {
-          margin-top: 1.5em;
-          margin-bottom: 0.8em;
-          font-size: 120%;
-          font-weight: bold;
-        }
-
-        h3 {
-          margin-top: 1.2em;
-          margin-bottom: 0.6em;
-          font-size: 110%;
-          font-weight: bold;
-        }
-
-        p {
-          max-width: 35em;
-          margin: 0.8em 0em;
-          text-align: justify;
-          line-height: 1.2;
-          hyphens: auto;
-        }
-
-        article ul {
-          margin: 0.5em 0em 1em;
-        }
-        article li {
-          margin: 0.5em 0em 0.5em 1.5em;
-        }
-        article dl {
-          margin: 1.5em 0em;
-        }
-        article dl dt {
-          margin: 1em 0em 0.5em;
-          font-weight: bold;
-        }
-        article dl dd {
-          margin: 0.5em 0em 0.5em 2em;
-        }
-        article table {
-          margin: 1.5em 0em;
-          border-collapse: collapse;
-        }
-        article table td,
-        article table th {
-          padding: 0.3em 0.5em;
-          border: 0.06em solid #808080;
-        }
-        article pre,
-        article code {
-          font-family: 'Courier 10 Pitch BT', monospace;
-        }
-        article blockquote {
-          margin: 1em 0em;
-          padding: 0em 1em;
-          border: 0.06em solid #c0c0c0;
-        }
-        article iframe {
-          display: none;
-        }
-        article *.floatright {
-          margin-left: 2em;
-          margin-bottom: 1em;
-        }
-        article *.container.floatright {
-          margin-left: 1em;
-          margin-bottom: 0.5em;
-          padding-left: 0.5em;
-          padding-bottom: 0.5em;
-          border-left: 0.06em solid #a0a0a0;
-          border-bottom: 0.06em solid #a0a0a0;
-          border-bottom-left-radius: 0.3em;
-        }
-        article *.container > a,
-        article *.container > a > img {
-          display: block;
-        }
-        article *.container.inline {
-          display: inline-block;
-          margin-right: 1em;
-          margin-bottom: 1em;
-          vertical-align: top;
-        }
-        article div.horzAdvert,
-        article div.vertAdvert {
-          display: none;
-        }
-        article ul.pagelinks {
-          list-style-type: none;
-        }
-        article ul.pagelinks img {
-          display: inline-block;
-          margin-right: 0.5em;
-          border: 0.06em solid #808080;
-          vertical-align: middle;
-        }
-        article > footer {
-          margin-top: 3em;
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-          font-size: 75%;
-        }
-        article > footer #datelink {
-          color: inherit;
-        }
-
-        body > div.vert-main > div.horz-main > aside {
-          display: none;
-        }
-
-        body > div.vert-main > nav {
-          display: none;
-        }
-
-        body > div.vert-main + hr {
-          display: block;
-          border-bottom: 0.06em solid #000000;
-        }
-
-        body > footer {
-          margin-top: 1em;
-          font-size: 70%;
-          display: flex;
-          flex-direction: row;
-          justify-content: space-between;
-        }
-        body > footer > p {
-          padding: 0em 1em;
-        }
-        body > footer > p:first-child {
-          padding-left: 0em;
-        }
-        body > footer > p:last-child {
-          padding-right: 0em;
-        }
-        body > footer #copyrightlink {
-          color: inherit;
-        }
-      }
     </style>
     <style type="text/css">
       article th {
@@ -860,8 +687,21 @@
         margin-left: 1em;
       }
 
+      .preview-img {
+        max-width: 256px;
+        max-height: 256px;
+        object-fit: contain;
+        background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAAAAABzHgM7AAAAF0lEQVR42mM4Awb/wYCBYg6EgghRzAEAWDWBGQVyKPMAAAAASUVORK5CYII=);
+      }
+
       .palette {
         width: 256px;
+        background: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAAAAABzHgM7AAAAF0lEQVR42mM4Awb/wYCBYg6EgghRzAEAWDWBGQVyKPMAAAAASUVORK5CYII=);
+      }
+      .palette::after {
+        content: '';
+        display: block;
+        clear: both;
       }
       .palette i {
         float: left;
@@ -949,7 +789,7 @@
           <h2>Program</h2>
           <table id="input" class="noborder">
             <tbody>
-              <tr>
+              <tr style="display: none">
                 <td>Use sample file:</td>
                 <td>
                   <select>
@@ -961,6 +801,9 @@
               <tr>
                 <td>Read local file:</td>
                 <td><input type="file" accept="image/png,.png" /></td>
+                <td rowspan="2" width="300">
+                  <img class="preview-img" />
+                </td>
               </tr>
             </tbody>
           </table>
@@ -971,7 +814,7 @@
                 <th>Start offset</th>
                 <th>Raw bytes</th>
                 <th>Chunk outside</th>
-                <th>Chunk inside</th>
+                <th width="300">Chunk inside</th>
                 <th>Errors</th>
               </tr>
             </thead>
@@ -1058,27 +901,27 @@
                   document.querySelector('article table#input a'),
                   HTMLAnchorElement
                 );
-                selectElem.onchange = function () {
-                  if (ignoreSelect) return;
-                  else if (selectElem.selectedIndex == 0)
-                    aElem.style.display = 'none';
-                  else {
-                    ignoreFile = true;
-                    fileElem.value = '';
-                    ignoreFile = false;
-                    var filePath =
-                      '/res/png-file-chunk-inspector/' + selectElem.value;
-                    aElem.style.removeProperty('display');
-                    aElem.href = filePath;
-                    var xhr_1 = new XMLHttpRequest();
-                    xhr_1.onload = function () {
-                      return visualizeFile(xhr_1.response);
-                    };
-                    xhr_1.open('GET', filePath);
-                    xhr_1.responseType = 'arraybuffer';
-                    xhr_1.send();
-                  }
-                };
+                // selectElem.onchange = function () {
+                //   if (ignoreSelect) return;
+                //   else if (selectElem.selectedIndex == 0)
+                //     aElem.style.display = 'none';
+                //   else {
+                //     ignoreFile = true;
+                //     fileElem.value = '';
+                //     ignoreFile = false;
+                //     var filePath =
+                //       '/res/png-file-chunk-inspector/' + selectElem.value;
+                //     aElem.style.removeProperty('display');
+                //     aElem.href = filePath;
+                //     var xhr_1 = new XMLHttpRequest();
+                //     xhr_1.onload = function () {
+                //       return visualizeFile(xhr_1.response);
+                //     };
+                //     xhr_1.open('GET', filePath);
+                //     xhr_1.responseType = 'arraybuffer';
+                //     xhr_1.send();
+                //   }
+                // };
                 fileElem.onchange = function (e) {
                   if (ignoreFile) return;
                   ignoreSelect = true;
@@ -1092,6 +935,11 @@
                     return visualizeFile(reader.result);
                   };
                   reader.readAsArrayBuffer(files[0]);
+
+                  const imgEle = document.querySelector('.preview-img');
+                  URL.revokeObjectURL(imgEle.src);
+                  imgEle.src = URL.createObjectURL(files[0]);
+
                   e.target.value = null;
                 };
               }
@@ -1142,19 +990,20 @@
                   }
                 }
 
-                // const totalLen = imageDataArr.reduce(
-                //   (prev, cur) => prev + cur.length,
-                //   0
-                // );
-                // const totalImageData = new Uint8Array(totalLen);
-                // let offset = 0;
-                // imageDataArr.forEach((item) => {
-                //   totalImageData.set(item, offset);
-                //   offset += item.length;
-                // });
-                // console.log('--ori--', totalImageData);
+                const totalLen = imageDataArr.reduce(
+                  (prev, cur) => prev + cur.length,
+                  0
+                );
+                const totalImageData = new Uint8Array(totalLen);
+                let offset = 0;
+                imageDataArr.forEach((item) => {
+                  totalImageData.set(item, offset);
+                  offset += item.length;
+                });
+                console.log('--ori--', totalImageData);
 
-                // const unzip = pako.inflate(totalImageData);
+                // const unzip = deflate.decompressZlib(totalImageData);
+                const unzip = pako.inflate(totalImageData);
                 // console.log(
                 //   '--gzip--',
                 //   pako.deflate(unzip, {
@@ -1165,7 +1014,18 @@
                 //     // dictionary: gzipDICT,
                 //   })
                 // );
-                // console.log('--ungzip--', unzip);
+                console.log('--ungzip--', unzip);
+
+                const colorsMap = {};
+                unzip.forEach((colorIdx) => {
+                  // console.log(colorIdx);
+                  if (colorsMap[colorIdx] == undefined) {
+                    colorsMap[colorIdx] = 1;
+                  } else {
+                    colorsMap[colorIdx]++;
+                  }
+                });
+                console.log(colorsMap);
 
                 requireType(
                   document.querySelector('article span#summary'),
@@ -3019,6 +2879,22 @@
                           chunk.errorNotes.push(
                             'Number of alpha values exceeds palette size'
                           );
+
+                        const chunkPLTE = earlier.find(
+                          (chunk) => chunk.typeStr == 'PLTE'
+                        );
+                        const elementsPLTE =
+                          chunkPLTE.extendNotes[0].querySelectorAll('i');
+                        for (let i = 0; i < numEntries; i++) {
+                          const eleStyle = elementsPLTE[i].style;
+                          const rgb = eleStyle.backgroundColor.replace(
+                            /rgb\((.+?)\)/,
+                            '$1'
+                          );
+                          eleStyle.backgroundColor = `rgba(${rgb}, ${
+                            chunk.data[i] / 255
+                          })`;
+                        }
                       } else {
                         if (colorType == 0 && chunk.data.length != 2)
                           chunk.errorNotes.push('Invalid data length');
