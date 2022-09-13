@@ -963,6 +963,7 @@
                 var summary = '';
 
                 var imageDataArr = [],
+                  transparency = 0,
                   gzipDICT = null;
 
                 for (var i = 0; i < parts.length; i++) {
@@ -972,6 +973,9 @@
                     summary += part.typeStr;
                     if (part.typeStr == 'PLTE') {
                       gzipDICT = part.data;
+                    }
+                    if (part.typeStr == 'tRNS') {
+                      transparency = part.data.length;
                     }
                     if (part.typeStr == 'IDAT') {
                       var count = 1;
@@ -1004,16 +1008,16 @@
 
                 // const unzip = deflate.decompressZlib(totalImageData);
                 const unzip = pako.inflate(totalImageData);
-                // console.log(
-                //   '--gzip--',
-                //   pako.deflate(unzip, {
-                //     level: 9,
-                //     memLevel: 9,
-                //     windowBits: 15,
-                //     strategy: 0,
-                //     // dictionary: gzipDICT,
-                //   })
-                // );
+                console.log(
+                  '--gzip--',
+                  pako.deflate(unzip, {
+                    level: 9,
+                    memLevel: 9,
+                    windowBits: 15,
+                    strategy: 0,
+                    // dictionary: gzipDICT,
+                  })
+                );
                 console.log('--ungzip--', unzip);
 
                 const colorsMap = {};
@@ -1025,7 +1029,44 @@
                     colorsMap[colorIdx]++;
                   }
                 });
-                console.log(colorsMap);
+                let colorsList = [];
+                for (let k in colorsMap) {
+                  k = parseInt(k);
+                  colorsList[k] = {
+                    index: k,
+                    count: colorsMap[k],
+                  };
+                }
+                const arr1 = colorsList
+                  .slice(0, transparency)
+                  .sort((x, y) => y.count - x.count);
+                const arr2 = colorsList
+                  .slice(transparency)
+                  .sort((x, y) => y.count - x.count);
+                colorsList = [...arr1, ...arr2];
+                // colorsList.sort((x, y) => y.count - x.count);
+                const sortColorTab = {};
+                colorsList.forEach((c, i) => {
+                  sortColorTab[c?.index] = i;
+                });
+
+                console.log(colorsList);
+
+                const unzip2 = unzip.map((byte) => {
+                  return sortColorTab[byte];
+                });
+
+                console.log(unzip2);
+                console.log(
+                  '--gzip--',
+                  pako.deflate(unzip2, {
+                    level: 9,
+                    memLevel: 9,
+                    windowBits: 15,
+                    strategy: 0,
+                    // dictionary: gzipDICT,
+                  })
+                );
 
                 requireType(
                   document.querySelector('article span#summary'),
@@ -2486,12 +2527,12 @@
                         div.className = 'palette';
                         chunk.extendNotes.push(div);
                         for (var i = 0; i < numEntries; i++) {
-                          var node = document.createElement('i');
-                          node.style.cssText = `background-color: rgba(${
-                            chunk.data[i * 3 + 0]
-                          }, ${chunk.data[i * 3 + 1]}, ${
-                            chunk.data[i * 3 + 2]
-                          })`;
+                          const node = document.createElement('i');
+                          const color = `rgb(${chunk.data[i * 3 + 0]}, ${
+                            chunk.data[i * 3 + 1]
+                          }, ${chunk.data[i * 3 + 2]})`;
+                          node.title = `${i}: ${color}`;
+                          node.style.cssText = `background-color: ${color}`;
                           div.appendChild(node);
                         }
                       }
@@ -2894,6 +2935,9 @@
                           eleStyle.backgroundColor = `rgba(${rgb}, ${
                             chunk.data[i] / 255
                           })`;
+                          elementsPLTE[
+                            i
+                          ].title = `${i}: ${eleStyle.backgroundColor}`;
                         }
                       } else {
                         if (colorType == 0 && chunk.data.length != 2)
