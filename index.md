@@ -11,3 +11,6 @@
 [图片相似度](https://panhongxue.github.io/image-tools/image-ssim.html)
 
 [PNG inspector](https://panhongxue.github.io/image-tools/png-file-chunk-inspector.html)
+
+---
+[mediainfo.js](https://mediainfo.js.org/)
