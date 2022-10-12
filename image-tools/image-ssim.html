@@ -92,6 +92,12 @@
         width: 1px;
         height: 1px;
       }
+      .hue_result {
+        margin-top: 60px;
+      }
+      .hue_result p {
+        margin: 0;
+      }
     </style>
   </head>
   <body>
@@ -169,6 +175,16 @@
             <p>分辨率：<span>{{imageWH2}}</span></p>
             <p>大小：<span>{{prettyBytes(file2.size)}}</span></p>
             <p>品质：<span>{{image2Quality}}</span></p>
+            <div class="hue_result">
+              <label>色相统计：</label>
+              <p v-for="color in colorsAll">
+                <span
+                  :style="{color:`hsl(${color.h*360}deg, ${color.s*100}%, ${color.l*100}%)`}"
+                >
+                  {{color.color}} {{color.ratio}}%
+                </span>
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -387,6 +403,7 @@
           ssimColor: '',
           imgSSIM: '',
           // hsl: rgbToHsl(255, 0, 0, true),
+          colorsAll: [],
           colors: [],
         };
       },
@@ -490,7 +507,7 @@
               b = data[i + 2];
             }
             const hsl = rgbToHsl(r, g, b);
-            if (hsl.s > 0.4 && hsl.l > 0.3 && hsl.l < 0.7) {
+            if (hsl.s > 0.25 && hsl.l > 0.25 && hsl.l < 0.75) {
               let h = hsl.h + grid / 2;
               h = h >= 1 ? h - 1 : h;
               const idx = Math.floor(h / grid);
@@ -501,6 +518,10 @@
 
               // if (idx == 2) {
               //   this.logColor(r, g, b);
+              // }
+            } else {
+              // if (hsl.h > 0) {
+              //   debugger;
               // }
             }
             pixelCount++;
@@ -523,6 +544,8 @@
             return Object.assign(hsl, hslToRgb(hsl.h, hsl.s, 0.5));
           });
           console.log(colors);
+          colors.sort((x, y) => y.ratio - x.ratio);
+          this.colorsAll = JSON.parse(JSON.stringify(colors));
 
           colors = colors.filter((item) => item.ratio >= 1);
           console.log('过滤1%', colors);
