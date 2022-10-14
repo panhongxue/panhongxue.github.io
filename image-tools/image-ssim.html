@@ -179,7 +179,7 @@
               <label>色相统计：</label>
               <p v-for="color in colorsAll">
                 <span
-                  :style="{color:`hsl(${color.h*360}deg, ${color.s*100}%, ${color.l*100}%)`}"
+                  :style="{color:`hsl(${color.h*360}deg, ${color.s*100}%, ${(color.l>.9?0.1:color.l)*100}%)`}"
                 >
                   {{color.color}} {{color.ratio}}%
                 </span>
@@ -495,6 +495,9 @@
             '紫色',
             '粉紫色',
             '品红',
+            '白色',
+            '黑色',
+            '灰色',
           ];
           const grid = 1 / 12;
           const { data } = imgData;
@@ -507,23 +510,36 @@
               b = data[i + 2];
             }
             const hsl = rgbToHsl(r, g, b);
-            if (hsl.s > 0.25 && hsl.l > 0.25 && hsl.l < 0.75) {
-              let h = hsl.h + grid / 2;
-              h = h >= 1 ? h - 1 : h;
-              const idx = Math.floor(h / grid);
-              huv[idx] = huv[idx] || { h: [], s: [], l: [] };
-              huv[idx].h.push(h);
-              huv[idx].s.push(hsl.s);
-              huv[idx].l.push(hsl.l);
 
+            let idx;
+            let h = hsl.h;
+            // 白色，亮度>=95%
+            if (hsl.l >= 0.95) {
+              idx = 12;
+              // 黑色，亮度<=5%
+            } else if (hsl.l <= 0.05) {
+              idx = 13;
+              // 灰色，饱和度<=5%
+            } else if (hsl.s <= 0.05) {
+              idx = 14;
+              // 彩色
+            } else if (hsl.s > 0.25 && hsl.l > 0.25 && hsl.l < 0.75) {
+              h = hsl.h + grid / 2;
+              h = h >= 1 ? h - 1 : h;
+              idx = Math.floor(h / grid);
               // if (idx == 2) {
               //   this.logColor(r, g, b);
               // }
             } else {
-              // if (hsl.h > 0) {
-              //   debugger;
-              // }
             }
+
+            if (idx !== undefined) {
+              huv[idx] = huv[idx] || { h: [], s: [], l: [] };
+              huv[idx].h.push(h);
+              huv[idx].s.push(hsl.s);
+              huv[idx].l.push(hsl.l);
+            }
+
             pixelCount++;
 
             i += 4 * blockSize;
