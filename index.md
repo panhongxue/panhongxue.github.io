@@ -10,6 +10,8 @@
 
 [图片相似度](https://panhongxue.github.io/image-tools/image-ssim.html)
 
+[HSL 色相、亮度、饱和度](https://panhongxue.github.io/image-tools/HSL.html)
+
 [PNG inspector](https://panhongxue.github.io/image-tools/png-file-chunk-inspector.html)
 
 ---
