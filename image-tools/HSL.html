@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HSL 色相、饱和度、亮度</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"
+    />
+    <style>
+      [v-cloak] {
+        display: none;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      .container {
+        display: flex;
+      }
+      .tool-box {
+        /* border: 1px solid red; */
+        padding: 0 20px;
+      }
+      .tool-box > div {
+        margin: 10px 0;
+      }
+      .main-content {
+        /* border: 1px solid blue; */
+        flex: 1;
+        overflow: hidden;
+      }
+      .view {
+        width: 100%;
+        height: 400px;
+        display: flex;
+        /* justify-content: center; */
+        align-items: center;
+        overflow: auto;
+        border: 1px solid #666;
+        background-color: #c8c8c8;
+      }
+      .view::-webkit-scrollbar {
+        width: 7px;
+        height: 7px;
+        background-color: rgba(255, 255, 255, 0);
+      }
+      .view::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 50px;
+      }
+      .view::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.4);
+      }
+
+      .bg {
+        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAAAAABzHgM7AAAAF0lEQVR42mM4Awb/wYCBYg6EgghRzAEAWDWBGQVyKPMAAAAASUVORK5CYII=);
+        margin: auto;
+      }
+      canvas {
+        float: left;
+        cursor: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAABXUlEQVRIieXTPUtcURDG8V90QSSBkCKLsdnCJpCUIYhpBMFOiB8jWPgV/ApiYyViY5o0qcIStNiQwkZwFZtELAyIixB8KYTgprjncnevuu65u434wDTznPmf4ZwZHrue4BP2cIYaPvQLPog1NHPxD9O9gJ92gKdRKwpfQB3rHeBNyXMV6rx+DziN3bRoIOKCS2x2eXYpgotkWhYl3V3ht7u7Xwvno+BLLfCPeImdW+CfUYqBD2I1FF9qH7+y9j9ZD+e7Vkk2LeeYzPmj2G+5oC4ZhK7hX0LhX0zk/Ap+BX87wBdiul8Jxad4l/PGcBj8LbyI6RxmZc+Sh7/GUfB/4HkMOFU1AOZy+bc4Dt4GnhWBw0mAVFpy79EI+W8YLgofD5CGZMvLmJeMaBNfMVQUPoKDAPop+cBr2Rgui1yivL67uZkXkvee6QWc6o3sE/9gSuRmdntJFa/6DX64+g/e8noejrjLUwAAAABJRU5ErkJggg==)
+            3 19,
+          crosshair;
+      }
+
+      .controls {
+        margin: auto;
+        max-width: 700px;
+      }
+      .option {
+        display: flex;
+        align-items: center;
+      }
+      .option label {
+        white-space: nowrap;
+        margin-right: 20px;
+        width: 60px;
+      }
+      .option > div {
+        flex: 1;
+      }
+      .slider-hue .el-slider__runway {
+        background-image: linear-gradient(
+          to right,
+          #f00 0%,
+          #ff0 17%,
+          #0f0 33%,
+          #0ff 50%,
+          #00f 67%,
+          #f0f 83%,
+          #f00 100%
+        );
+      }
+      .slider-hue .el-slider__runway.disabled {
+        filter: grayscale(1);
+      }
+      .slider-hue .el-slider__bar {
+        background-color: transparent;
+      }
+
+      .cursor-color {
+        display: flex;
+        align-items: center;
+      }
+      .cursor-color > * {
+        margin-right: 10px;
+      }
+
+      .hue {
+        background-image: url(https://panhongxue.github.io/files/img/hue.png);
+        background-repeat: no-repeat;
+        background-size: 100%;
+        width: 400px;
+        height: 333px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        flex: none !important;
+      }
+      .hue em {
+        position: absolute;
+        margin: 3px 0 0 3px;
+        /* border-radius: 50%; */
+        width: 276px;
+        height: 276px;
+        /* transform: rotate(45deg); */
+      }
+      .hue i {
+        display: block;
+        margin: auto;
+        width: 4px;
+        height: 50%;
+        border-radius: 2px;
+        background-color: #0052d9;
+      }
+      .hue_result {
+        /* margin-top: 50px; */
+      }
+      .hue_result p {
+        margin: 0;
+        text-indent: 2em;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" v-cloak>
+      <div class="container">
+        <div class="tool-box">
+          <div>
+            <el-upload
+              action=""
+              :auto-upload="false"
+              :show-file-list="false"
+              :on-change="onOpenImage"
+              accept="image/*"
+            >
+              <el-button size="small" type="primary">打开图片</el-button>
+            </el-upload>
+          </div>
+          <div>
+            <el-button size="small" type="success" @click="onSaveImage"
+              >保存图片</el-button
+            >
+          </div>
+        </div>
+        <div class="main-content">
+          <div id="view" class="view">
+            <div class="bg">
+              <div class="img"><canvas /></div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="option">
+              <label>取色:</label>
+              <div class="cursor-color">
+                <el-color-picker
+                  v-model="cursorHSL"
+                  color-format="hsl"
+                ></el-color-picker>
+                <span>{{ cursorHSL }}</span>
+                <el-button
+                  size="mini"
+                  :disabled="cursorHSL==null"
+                  @click="onClearCursorColor"
+                  >清空</el-button
+                >
+              </div>
+            </div>
+            <div class="option">
+              <label>色相:</label>
+              <div>
+                <el-slider
+                  v-model="colorH"
+                  :max="360"
+                  class="slider-hue"
+                  show-input
+                  @input="onColorTransform"
+                />
+              </div>
+            </div>
+            <div class="option">
+              <label>亮度:</label>
+              <div>
+                <el-slider
+                  v-model="colorL"
+                  show-input
+                  @input="onColorTransform"
+                />
+              </div>
+            </div>
+            <div class="option">
+              <label>饱和度:</label>
+              <div>
+                <el-slider
+                  v-model="colorS"
+                  show-input
+                  @input="onColorTransform"
+                />
+              </div>
+            </div>
+            <div class="option">
+              <div class="hue_result">
+                <label>色相统计：</label>
+                <p v-for="color in colorsAll">
+                  <span
+                    :style="{color:`hsl(${color.h*360}deg, ${color.s*100}%, ${(color.l>.9?0.1:color.l)*100}%)`}"
+                  >
+                    {{color.color}} {{color.ratio}}%
+                  </span>
+                </p>
+              </div>
+              <div class="hue">
+                <em
+                  v-for="hsl in colors"
+                  :style="{width:(40+2*(1-hsl.l/100)*236)+'px', height:2*(40+(1-hsl.l/100)*236)+'px', transform:`rotate(${hsl.h}deg)`}"
+                >
+                  <i
+                    :style="{width:hsl.ratio+'px', backgroundColor:`rgba(${255-hsl.r},${255-hsl.g},${255-hsl.b},0.75)`}"
+                  ></i>
+                </em>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://unpkg.com/vue@2"></script>
+    <script src="https://unpkg.com/element-ui"></script>
+    <script src="https://unpkg.com/file-saver"></script>
+    <script>
+      (function () {
+        let canvas, ctx, currentFile, imgData, hslData;
+        let cursorH, cursorS, cursorL;
+        let noTrigger = false;
+
+        function rgbToHsl(r, g, b) {
+          (r /= 255), (g /= 255), (b /= 255);
+          var max = Math.max(r, g, b),
+            min = Math.min(r, g, b);
+          var h = 0,
+            s,
+            l = (max + min) / 2;
+
+          if (max == min) {
+            h = s = 0; // achromatic
+          } else {
+            var d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+              case r:
+                h = (g - b) / d + (g < b ? 6 : 0);
+                break;
+              case g:
+                h = (b - r) / d + 2;
+                break;
+              case b:
+                h = (r - g) / d + 4;
+                break;
+            }
+            h /= 6;
+          }
+          h = Math.floor(h * 360);
+          s = Math.floor(s * 100);
+          l = Math.floor(l * 100);
+          const ret = { h, s, l };
+
+          return ret;
+        }
+        function hslToRgb(h, s, l) {
+          var r, g, b;
+
+          h = h / 360;
+          s = s / 100;
+          l = l / 100;
+
+          if (s == 0) {
+            r = g = b = l; // achromatic
+          } else {
+            var hue2rgb = function hue2rgb(p, q, t) {
+              if (t < 0) t += 1;
+              if (t > 1) t -= 1;
+              if (t < 1 / 6) return p + (q - p) * 6 * t;
+              if (t < 1 / 2) return q;
+              if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+              return p;
+            };
+
+            var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            var p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1 / 3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1 / 3);
+          }
+
+          return {
+            r: Math.round(r * 255),
+            g: Math.round(g * 255),
+            b: Math.round(b * 255),
+          };
+        }
+
+        let blobUrl;
+        function createBlobURL(file) {
+          URL.revokeObjectURL(blobUrl);
+          blobUrl = URL.createObjectURL(file);
+          return blobUrl;
+        }
+        var timer;
+        function debounce(fn, delay = 200) {
+          return function () {
+            var self = this;
+            var args = arguments;
+            if (timer) {
+              clearTimeout(timer);
+            }
+            timer = window.setTimeout(function () {
+              timer = null;
+              fn.apply(self, args);
+            }, delay);
+          };
+        }
+        let timeout;
+        function throttle(fn, wait = 200) {
+          return function () {
+            let context = this;
+            let args = arguments;
+            if (!timeout) {
+              timeout = setTimeout(function () {
+                timeout = null;
+                fn.apply(context, args);
+              }, wait);
+            }
+          };
+        }
+
+        new Vue({
+          el: '#app',
+          data() {
+            return {
+              cursorHSL: null,
+              colorH: 0,
+              colorS: 0,
+              colorL: 0,
+              zoom: 1,
+              colorsAll: [],
+              colors: [],
+            };
+          },
+          watch: {
+            cursorHSL(val) {
+              if (val == null) {
+                this.onClearCursorColor();
+              } else {
+                const [h, s, l] = val.match(/\d+/g);
+                cursorH = parseInt(h);
+                cursorS = parseInt(s);
+                cursorL = parseInt(l);
+                noTrigger = true;
+                this.colorH = cursorH;
+                this.$nextTick(() => {
+                  noTrigger = false;
+                });
+              }
+            },
+          },
+          mounted() {
+            canvas = document.querySelector('canvas');
+            ctx = canvas.getContext('2d');
+            this.bindEvents();
+            this.reset();
+          },
+          methods: {
+            bindEvents() {
+              const $view = document.getElementById('view');
+              const $img = $view.querySelector('.img');
+              $view.addEventListener('mousewheel', (e) => {
+                if (e.ctrlKey) {
+                  e.preventDefault();
+
+                  let zoom = parseFloat(getComputedStyle($img).zoom);
+                  if (e.deltaY < 0) {
+                    zoom += 0.1;
+                  } else {
+                    zoom = Math.max(0.1, zoom - 0.1);
+                  }
+                  this.viewZoom(zoom);
+                }
+              });
+
+              let spaceDown = false;
+              document.addEventListener('keydown', (e) => {
+                switch (e.key) {
+                  case ' ':
+                    e.preventDefault();
+
+                    if (!spaceDown) {
+                      spaceDown = true;
+                      canvas.style.cursor = 'grab';
+                    }
+                    break;
+                  case '0':
+                    if (e.ctrlKey) {
+                      this.viewZoom(1);
+                    }
+                    break;
+                }
+              });
+              document.addEventListener('keyup', (e) => {
+                spaceDown = false;
+                if (!moveStart) {
+                  canvas.style.cursor = '';
+                }
+              });
+
+              let moveStart = false;
+              let startPos = {};
+              $view.addEventListener(
+                'mousedown',
+                (e) => {
+                  if (spaceDown) {
+                    e.stopPropagation();
+                    moveStart = true;
+                    startPos = {
+                      x: $view.scrollLeft + e.x,
+                      y: $view.scrollTop + e.y,
+                    };
+                    canvas.style.cursor = 'grabbing';
+                  }
+                },
+                true
+              );
+              document.addEventListener('mousemove', (e) => {
+                if (moveStart) {
+                  $view.scrollLeft = startPos.x - e.x;
+                  $view.scrollTop = startPos.y - e.y;
+                } else if (pickerColorMode) {
+                  this.pickerCursorColor(e);
+                }
+              });
+              document.addEventListener('mouseup', (e) => {
+                moveStart = false;
+                pickerColorMode = false;
+                canvas.style.cursor = spaceDown ? 'grab' : '';
+              });
+
+              let pickerColorMode = false;
+              canvas.addEventListener('mousedown', (e) => {
+                pickerColorMode = true;
+                this.pickerCursorColor(e);
+              });
+            },
+            viewZoom(zoom) {
+              this.zoom = zoom;
+              const $view = document.getElementById('view');
+              const $img = $view.querySelector('.img');
+
+              $img.style.zoom = zoom;
+
+              $view.scrollLeft = ($view.scrollWidth - $view.clientWidth) / 2;
+              $view.scrollTop = ($view.scrollHeight - $view.clientHeight) / 2;
+            },
+            render(img) {
+              const start = Date.now();
+
+              const $view = document.getElementById('view');
+              this.viewZoom($view.clientWidth / img.width);
+
+              canvas.width = img.width;
+              canvas.height = img.height;
+              ctx.drawImage(img, 0, 0);
+
+              hslData = this.getImageHSLData(ctx);
+
+              console.log('[OPEN] ElapsedTime:', Date.now() - start);
+            },
+            getImageHSLData() {
+              imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              const { data } = imgData;
+
+              const huv = {};
+              const huvMap = [
+                '红色',
+                '橙色',
+                '黄色',
+                '黄绿色',
+                '绿色',
+                '蓝绿色',
+                '青色',
+                '蓝色',
+                '蓝紫色',
+                '紫色',
+                '粉紫色',
+                '品红',
+                '白色',
+                '黑色',
+                '灰色',
+              ];
+              const grid = 360 / 12;
+
+              const hslData = [];
+              let r, g, b;
+              for (var i = 0; i < data.length; i += 4) {
+                if (data[i + 3] == 0) {
+                  r = g = b = 255;
+                } else {
+                  r = data[i];
+                  g = data[i + 1];
+                  b = data[i + 2];
+                }
+                const hsl = rgbToHsl(r, g, b);
+                hslData.push(hsl);
+
+                let idx;
+                let h = hsl.h;
+                // 白色，亮度>=95%
+                if (hsl.l >= 95) {
+                  idx = 12;
+                  // 黑色，亮度<=5%
+                } else if (hsl.l <= 5) {
+                  idx = 13;
+                  // 灰色，饱和度<=5%
+                } else if (hsl.s <= 5) {
+                  idx = 14;
+                  // 彩色
+                } else if (hsl.s > 25 && hsl.l > 25 && hsl.l < 75) {
+                  h = hsl.h + grid / 2;
+                  h = h >= 1 ? h - 1 : h;
+                  idx = Math.floor(h / grid);
+                }
+
+                if (idx !== undefined) {
+                  huv[idx] = huv[idx] || { h: [], s: [], l: [] };
+                  huv[idx].h.push(h);
+                  huv[idx].s.push(hsl.s);
+                  huv[idx].l.push(hsl.l);
+                }
+              }
+
+              const pixelCount = data.length / 4;
+              let colors = Object.keys(huv).map((idx) => {
+                const hsl = {
+                  index: Number(idx),
+                  color: huvMap[Number(idx)],
+                  ratio:
+                    Math.ceil((huv[idx].h.length / pixelCount) * 1000) / 10,
+                  count: huv[idx].h.length,
+                  h:
+                    huv[idx].h.reduce((n, m) => n + m) / huv[idx].h.length -
+                    grid / 2,
+                  s: huv[idx].s.reduce((n, m) => n + m) / huv[idx].s.length,
+                  l: huv[idx].l.reduce((n, m) => n + m) / huv[idx].l.length,
+                };
+                return Object.assign(hsl, hslToRgb(hsl.h, hsl.s, 50));
+              });
+              // console.log(colors);
+              colors.sort((x, y) => y.ratio - x.ratio);
+              this.colorsAll = JSON.parse(JSON.stringify(colors));
+
+              colors = colors.filter((item) => item.ratio >= 1);
+              // console.log('过滤1%', colors);
+              this.colors = JSON.parse(JSON.stringify(colors));
+
+              return hslData;
+            },
+            pickerCursorColor(e) {
+              if (!imgData) {
+                return;
+              }
+
+              const x = Math.round(e.offsetX / this.zoom);
+              const y = Math.round(e.offsetY / this.zoom);
+              const idx = y * canvas.width + x;
+              // console.log(x, y, idx);
+
+              let r = imgData.data[idx * 4];
+              let g = imgData.data[idx * 4 + 1];
+              let b = imgData.data[idx * 4 + 2];
+              const { h, s, l } = rgbToHsl(r, g, b);
+              this.cursorHSL = `hsl(${h}, ${s}%, ${l}%)`;
+            },
+            colorTransform() {
+              const start = Date.now();
+
+              if (!hslData) {
+                return;
+              }
+
+              const data = new Uint8ClampedArray(hslData.length * 4);
+              for (let i = 0; i < hslData.length; i++) {
+                let { h, s, l } = hslData[i];
+                if (cursorH) {
+                  if (
+                    Math.abs(h - cursorH) / 360 < 0.05 &&
+                    Math.abs(s - cursorS) / 100 < 0.3 &&
+                    Math.abs(l - cursorL) / 100 < 0.3
+                  ) {
+                    h = h + (this.colorH - cursorH);
+                  }
+                } else {
+                  h = h * (this.colorH / 180);
+                }
+                s = s * (this.colorS / 50);
+                l = l * (this.colorL / 50);
+                let { r, g, b } = hslToRgb(h, s, l);
+                data[i * 4 + 0] = r;
+                data[i * 4 + 1] = g;
+                data[i * 4 + 2] = b;
+                data[i * 4 + 3] = imgData.data[i * 4 + 3];
+              }
+
+              const newImgData = new ImageData(
+                data,
+                canvas.width,
+                canvas.height
+              );
+              ctx.putImageData(newImgData, 0, 0);
+
+              console.log('[COLOR] ElapsedTime:', Date.now() - start);
+            },
+
+            reset() {
+              this.onClearCursorColor();
+              this.colorH = 180;
+              this.colorS = this.colorL = 50;
+            },
+            onOpenImage({ raw: file }) {
+              currentFile = file;
+              const url = createBlobURL(file);
+
+              var image = new Image();
+              image.onload = () => {
+                this.reset();
+                this.render(image);
+              };
+              image.src = url;
+            },
+            onSaveImage() {
+              canvas.toBlob(
+                (blob) => {
+                  saveAs(blob, currentFile?.name);
+                },
+                currentFile?.type || 'image/jpeg',
+                80
+              );
+            },
+            onClearCursorColor() {
+              cursorH = cursorS = colorL = null;
+              this.cursorHSL = null;
+              this.colorH = 180;
+            },
+            onColorTransform() {
+              if (noTrigger) {
+                return;
+              }
+              throttle(this.colorTransform, 250)();
+            },
+          },
+        });
+      })();
+    </script>
+  </body>
+</html>
