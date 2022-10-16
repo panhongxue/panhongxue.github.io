@@ -133,7 +133,7 @@
             <p>大小：<span>{{prettyBytes(file1.size)}}</span></p>
             <p>品质：<span>{{image1Quality}}</span></p>
             <p>相似度：<span :style="{color:ssimColor}">{{imgSSIM}}</span></p>
-            <div class="hue">
+            <!-- <div class="hue">
               <em
                 v-for="hsl in colors"
                 :style="{width:(40+2*(1-hsl.l)*236)+'px', height:2*(40+(1-hsl.l)*236)+'px', transform:`rotate(${hsl.h*360}deg)`}"
@@ -142,7 +142,7 @@
                   :style="{width:hsl.ratio+'px', backgroundColor:`rgba(${255-hsl.r},${255-hsl.g},${255-hsl.b},0.75)`}"
                 ></i>
               </em>
-            </div>
+            </div> -->
             <div id="color_log"></div>
           </div>
         </div>
@@ -175,7 +175,7 @@
             <p>分辨率：<span>{{imageWH2}}</span></p>
             <p>大小：<span>{{prettyBytes(file2.size)}}</span></p>
             <p>品质：<span>{{image2Quality}}</span></p>
-            <div class="hue_result">
+            <!-- <div class="hue_result">
               <label>色相统计：</label>
               <p v-for="color in colorsAll">
                 <span
@@ -184,7 +184,7 @@
                   {{color.color}} {{color.ratio}}%
                 </span>
               </p>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
