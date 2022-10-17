@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HSL 色相、饱和度、亮度</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/element-ui/lib/theme-chalk/index.css"
+    />
+    <style>
+      [v-cloak] {
+        display: none;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      .container {
+        display: flex;
+      }
+      .tool-box {
+        /* border: 1px solid red; */
+        padding: 0 20px;
+      }
+      .tool-box > div {
+        margin: 10px 0;
+      }
+      .main-content {
+        /* border: 1px solid blue; */
+        flex: 1;
+        overflow: hidden;
+      }
+      .view {
+        width: 100%;
+        height: 400px;
+        display: flex;
+        /* justify-content: center; */
+        align-items: center;
+        overflow: auto;
+        border: 1px solid #666;
+        background-color: #c8c8c8;
+      }
+      .view::-webkit-scrollbar {
+        width: 7px;
+        height: 7px;
+        background-color: rgba(255, 255, 255, 0);
+      }
+      .view::-webkit-scrollbar-thumb {
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 50px;
+      }
+      .view::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 0, 0, 0.4);
+      }
+
+      .bg {
+        background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAAAAABzHgM7AAAAF0lEQVR42mM4Awb/wYCBYg6EgghRzAEAWDWBGQVyKPMAAAAASUVORK5CYII=);
+        margin: auto;
+      }
+      canvas {
+        float: left;
+        cursor: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAABXUlEQVRIieXTPUtcURDG8V90QSSBkCKLsdnCJpCUIYhpBMFOiB8jWPgV/ApiYyViY5o0qcIStNiQwkZwFZtELAyIixB8KYTgprjncnevuu65u434wDTznPmf4ZwZHrue4BP2cIYaPvQLPog1NHPxD9O9gJ92gKdRKwpfQB3rHeBNyXMV6rx+DziN3bRoIOKCS2x2eXYpgotkWhYl3V3ht7u7Xwvno+BLLfCPeImdW+CfUYqBD2I1FF9qH7+y9j9ZD+e7Vkk2LeeYzPmj2G+5oC4ZhK7hX0LhX0zk/Ap+BX87wBdiul8Jxad4l/PGcBj8LbyI6RxmZc+Sh7/GUfB/4HkMOFU1AOZy+bc4Dt4GnhWBw0mAVFpy79EI+W8YLgofD5CGZMvLmJeMaBNfMVQUPoKDAPop+cBr2Rgui1yivL67uZkXkvee6QWc6o3sE/9gSuRmdntJFa/6DX64+g/e8noejrjLUwAAAABJRU5ErkJggg==)
+            3 19,
+          crosshair;
+      }
+      .status {
+        display: flex;
+        align-items: center;
+        /* border: 1px solid #666; */
+        height: 44px;
+        margin-top: -1px;
+      }
+      .status > * {
+        /* border-left: 1px solid #666; */
+        margin-right: 24px;
+      }
+      .status .zoom {
+        display: flex;
+        align-items: center;
+        margin-top: -18px;
+      }
+      .status .zoom > div {
+        width: 400px;
+        margin: 0 0px 0 10px;
+      }
+
+      .controls {
+        margin: auto;
+        max-width: 700px;
+      }
+      .option {
+        display: flex;
+        align-items: center;
+      }
+      .option label {
+        white-space: nowrap;
+        margin-right: 20px;
+        width: 60px;
+      }
+      .option > div {
+        flex: 1;
+      }
+      .slider-hue .el-slider__runway {
+        background-image: linear-gradient(
+          to right,
+          #f00 0%,
+          #ff0 17%,
+          #0f0 33%,
+          #0ff 50%,
+          #00f 67%,
+          #f0f 83%,
+          #f00 100%
+        );
+      }
+      .slider-hue .el-slider__runway.disabled {
+        filter: grayscale(1);
+      }
+      .slider-hue .el-slider__bar {
+        background-color: transparent;
+      }
+
+      .cursor-color {
+        display: flex;
+        align-items: center;
+      }
+      .cursor-color > * {
+        margin-right: 10px;
+      }
+
+      .hue {
+        background-image: url(https://panhongxue.github.io/files/img/hue.png);
+        background-repeat: no-repeat;
+        background-size: 100%;
+        width: 400px;
+        height: 333px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        flex: none !important;
+      }
+      .hue em {
+        position: absolute;
+        margin: 3px 0 0 3px;
+        /* border-radius: 50%; */
+        width: 276px;
+        height: 276px;
+        /* transform: rotate(45deg); */
+      }
+      .hue i {
+        display: block;
+        margin: auto;
+        width: 4px;
+        height: 50%;
+        border-radius: 2px;
+        background-color: #0052d9;
+      }
+      .hue_result {
+        /* margin-top: 50px; */
+      }
+      .hue_result p {
+        margin: 0;
+        text-indent: 2em;
+        white-space: nowrap;
+      }
+
+      .el-dialog {
+        margin: 0;
+      }
+      .el-dialog__footer {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app" v-cloak>
+      <div class="container">
+        <div class="tool-box">
+          <div>
+            <el-upload
+              action=""
+              :auto-upload="false"
+              :show-file-list="false"
+              :on-change="onOpenImage"
+              accept="image/*"
+            >
+              <el-button size="small" type="primary">打开图片</el-button>
+            </el-upload>
+          </div>
+          <div>
+            <el-button size="small" type="success" @click="onSaveImage"
+              >保存图片</el-button
+            >
+          </div>
+        </div>
+        <div class="main-content">
+          <div id="view" class="view">
+            <div class="bg">
+              <div class="img"><canvas /></div>
+            </div>
+          </div>
+          <div class="status">
+            <div>{{currentFile.name}}</div>
+            <!-- <div>{{currentFile.type?.split('/')[1].toUpperCase()}}</div> -->
+            <div style="flex: 1">
+              {{currentImg?`${currentImg.width} x ${currentImg.height}`:``}}
+            </div>
+            <div class="zoom">
+              <label>缩放:</label>
+              <div>
+                <el-slider
+                  v-model="zoom"
+                  :step="0.1"
+                  :min="0.1"
+                  :max="10"
+                  :format-tooltip="formatP"
+                  :marks="marks"
+                ></el-slider>
+              </div>
+            </div>
+          </div>
+          <div class="controls">
+            <div class="option">
+              <label>取色:</label>
+              <div class="cursor-color">
+                <el-button size="mini" @click="dialogVisible=true"
+                  >容差</el-button
+                >
+                <el-color-picker
+                  v-model="cursorHSL"
+                  color-format="hsl"
+                ></el-color-picker>
+                <span>{{ cursorHSL }}</span>
+                <el-button
+                  size="mini"
+                  :disabled="cursorHSL==null"
+                  @click="onClearCursorColor"
+                  >清空</el-button
+                >
+              </div>
+            </div>
+            <div class="option">
+              <label>色相:</label>
+              <div>
+                <el-slider
+                  v-model="colorH"
+                  :max="360"
+                  class="slider-hue"
+                  show-input
+                  @input="onColorTransform"
+                />
+              </div>
+            </div>
+            <div class="option">
+              <label>亮度:</label>
+              <div>
+                <el-slider
+                  v-model="colorL"
+                  show-input
+                  @input="onColorTransform"
+                />
+              </div>
+            </div>
+            <div class="option">
+              <label>饱和度:</label>
+              <div>
+                <el-slider
+                  v-model="colorS"
+                  show-input
+                  @input="onColorTransform"
+                />
+              </div>
+            </div>
+            <div class="option">
+              <div class="hue_result">
+                <label>色相统计：</label>
+                <el-button size="mini" @click="getImageHSLData">统计</el-button>
+                <p v-for="color in colorsAll">
+                  <span
+                    :style="{color:`hsl(${color.h*360}deg, ${color.s*100}%, ${(color.l>.9?0.1:color.l)*100}%)`}"
+                  >
+                    {{color.color}} {{color.ratio}}%
+                  </span>
+                </p>
+              </div>
+              <div class="hue">
+                <em
+                  v-for="hsl in colors"
+                  :style="{width:(40+2*(1-hsl.l/100)*236)+'px', height:2*(40+(1-hsl.l/100)*236)+'px', transform:`rotate(${hsl.h}deg)`}"
+                >
+                  <i
+                    :style="{width:hsl.ratio+'px', backgroundColor:`rgba(${255-hsl.r},${255-hsl.g},${255-hsl.b},0.75)`}"
+                  ></i>
+                </em>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <el-dialog title="容差" :visible.sync="dialogVisible" width="30%">
+        <div>
+          <div>
+            <label>H:</label>
+            <el-slider
+              v-model="tolH"
+              :step="0.01"
+              :min="0"
+              :max="1"
+              :format-tooltip="formatP"
+              @input="onColorTransform"
+            ></el-slider>
+          </div>
+          <div>
+            <label>S:</label>
+            <el-slider
+              v-model="tolS"
+              :step="0.01"
+              :min="0"
+              :max="1"
+              :format-tooltip="formatP"
+              @input="onColorTransform"
+            ></el-slider>
+          </div>
+          <div>
+            <label>L:</label>
+            <el-slider
+              v-model="tolL"
+              :step="0.01"
+              :min="0"
+              :max="1"
+              :format-tooltip="formatP"
+              @input="onColorTransform"
+            ></el-slider>
+          </div>
+        </div>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="resetTol">重置</el-button>
+          <el-button type="primary" @click="dialogVisible = false"
+            >确 定</el-button
+          >
+        </span>
+      </el-dialog>
+    </div>
+
+    <script src="https://unpkg.com/vue@2"></script>
+    <script src="https://unpkg.com/element-ui"></script>
+    <script src="https://unpkg.com/file-saver"></script>
+    <script>
+      (function () {
+        let canvas, gl, imgData, hslData;
+        let cursorH = -1.0,
+          cursorS = -1.0,
+          cursorL = -1.0;
+        let noTrigger = false;
+
+        function rgbToHsl(r, g, b) {
+          (r /= 255), (g /= 255), (b /= 255);
+          var max = Math.max(r, g, b),
+            min = Math.min(r, g, b);
+          var h = 0,
+            s,
+            l = (max + min) / 2;
+
+          if (max == min) {
+            h = s = 0; // achromatic
+          } else {
+            var d = max - min;
+            s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+            switch (max) {
+              case r:
+                h = (g - b) / d + (g < b ? 6 : 0);
+                break;
+              case g:
+                h = (b - r) / d + 2;
+                break;
+              case b:
+                h = (r - g) / d + 4;
+                break;
+            }
+            h /= 6;
+          }
+          h = Math.floor(h * 360);
+          s = Math.floor(s * 100);
+          l = Math.floor(l * 100);
+          const ret = { h, s, l };
+
+          return ret;
+        }
+        function hslToRgb(h, s, l) {
+          var r, g, b;
+
+          h = h / 360;
+          s = s / 100;
+          l = l / 100;
+
+          if (s == 0) {
+            r = g = b = l; // achromatic
+          } else {
+            var hue2rgb = function hue2rgb(p, q, t) {
+              if (t < 0) t += 1;
+              if (t > 1) t -= 1;
+              if (t < 1 / 6) return p + (q - p) * 6 * t;
+              if (t < 1 / 2) return q;
+              if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+              return p;
+            };
+
+            var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+            var p = 2 * l - q;
+            r = hue2rgb(p, q, h + 1 / 3);
+            g = hue2rgb(p, q, h);
+            b = hue2rgb(p, q, h - 1 / 3);
+          }
+
+          return {
+            r: Math.round(r * 255),
+            g: Math.round(g * 255),
+            b: Math.round(b * 255),
+          };
+        }
+
+        let blobUrl;
+        function createBlobURL(file) {
+          URL.revokeObjectURL(blobUrl);
+          blobUrl = URL.createObjectURL(file);
+          return blobUrl;
+        }
+        var timer;
+        function debounce(fn, delay = 200) {
+          return function () {
+            var self = this;
+            var args = arguments;
+            if (timer) {
+              clearTimeout(timer);
+            }
+            timer = window.setTimeout(function () {
+              timer = null;
+              fn.apply(self, args);
+            }, delay);
+          };
+        }
+        let timeout;
+        function throttle(fn, wait = 200) {
+          return function () {
+            let context = this;
+            let args = arguments;
+            if (!timeout) {
+              timeout = setTimeout(function () {
+                timeout = null;
+                fn.apply(context, args);
+              }, wait);
+            }
+          };
+        }
+
+        function isArray(obj) {
+          return Object.prototype.toString.call(obj) == '[object Array]';
+        }
+        function isNumber(obj) {
+          return Object.prototype.toString.call(obj) == '[object Number]';
+        }
+        class Shader {
+          gl;
+          program;
+          positionBuffer = null;
+          texCoordBuffer = null;
+          positionAttribute = null;
+          texCoordAttribute = null;
+          constructor(gl, vertexSource, fragmentSource) {
+            this.gl = gl;
+            const vertexShader = this.compileSource(
+              gl.VERTEX_SHADER,
+              vertexSource
+            );
+            const fragmentShader = this.compileSource(
+              gl.FRAGMENT_SHADER,
+              fragmentSource
+            );
+            this.program = this.createProgram(vertexShader, fragmentShader);
+          }
+          drawRect(left, top, right, bottom) {
+            const { gl } = this;
+            const viewport = gl.getParameter(gl.VIEWPORT);
+            left = left !== void 0 ? (left - viewport[0]) / viewport[2] : 0;
+            top = top !== void 0 ? (top - viewport[1]) / viewport[3] : 0;
+            right = right !== void 0 ? (right - viewport[0]) / viewport[2] : 1;
+            bottom =
+              bottom !== void 0 ? (bottom - viewport[1]) / viewport[3] : 1;
+            if (this.positionBuffer == null) {
+              this.positionBuffer = gl.createBuffer();
+            }
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+            gl.bufferData(
+              gl.ARRAY_BUFFER,
+              new Float32Array([
+                left,
+                top,
+                left,
+                bottom,
+                right,
+                top,
+                right,
+                bottom,
+              ]),
+              gl.STATIC_DRAW
+            );
+            if (this.texCoordBuffer == null) {
+              this.texCoordBuffer = gl.createBuffer();
+              gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
+              gl.bufferData(
+                gl.ARRAY_BUFFER,
+                new Float32Array([0, 0, 0, 1, 1, 0, 1, 1]),
+                gl.STATIC_DRAW
+              );
+            }
+            if (this.positionAttribute == null) {
+              this.positionAttribute = gl.getAttribLocation(
+                this.program,
+                'a_position'
+              );
+              gl.enableVertexAttribArray(this.positionAttribute);
+            }
+            if (this.texCoordAttribute == null) {
+              this.texCoordAttribute = gl.getAttribLocation(
+                this.program,
+                'a_texCoord'
+              );
+              gl.enableVertexAttribArray(this.texCoordAttribute);
+            }
+            gl.useProgram(this.program);
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
+            gl.vertexAttribPointer(
+              this.positionAttribute,
+              2,
+              gl.FLOAT,
+              false,
+              0,
+              0
+            );
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.texCoordBuffer);
+            gl.vertexAttribPointer(
+              this.texCoordAttribute,
+              2,
+              gl.FLOAT,
+              false,
+              0,
+              0
+            );
+            gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+          }
+          uniforms(uniforms) {
+            const { gl } = this;
+            gl.useProgram(this.program);
+            for (var name in uniforms) {
+              if (!uniforms.hasOwnProperty(name)) continue;
+              var location = gl.getUniformLocation(this.program, name);
+              if (location === null) continue;
+              var value = uniforms[name];
+              if (isArray(value)) {
+                switch (value.length) {
+                  case 1:
+                    gl.uniform1fv(location, new Float32Array(value));
+                    break;
+                  case 2:
+                    gl.uniform2fv(location, new Float32Array(value));
+                    break;
+                  case 3:
+                    gl.uniform3fv(location, new Float32Array(value));
+                    break;
+                  case 4:
+                    gl.uniform4fv(location, new Float32Array(value));
+                    break;
+                  case 9:
+                    gl.uniformMatrix3fv(
+                      location,
+                      false,
+                      new Float32Array(value)
+                    );
+                    break;
+                  case 16:
+                    gl.uniformMatrix4fv(
+                      location,
+                      false,
+                      new Float32Array(value)
+                    );
+                    break;
+                  default:
+                    throw (
+                      `dont't know how to load uniform "` +
+                      name +
+                      '" of length ' +
+                      value.length
+                    );
+                }
+              } else if (isNumber(value)) {
+                gl.uniform1f(location, value);
+              } else {
+                throw (
+                  'attempted to set uniform "' +
+                  name +
+                  '" to invalid value ' +
+                  (value || 'undefined').toString()
+                );
+              }
+            }
+            return this;
+          }
+          createProgram(vertexShader, fragmentShader) {
+            const { gl } = this;
+            const program = gl.createProgram();
+            gl.attachShader(program, vertexShader);
+            gl.attachShader(program, fragmentShader);
+            gl.linkProgram(program);
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+              throw new Error('link error: ' + gl.getProgramInfoLog(program));
+            }
+            return program;
+          }
+          compileSource(type, source) {
+            const { gl } = this;
+            const shader = gl.createShader(type);
+            gl.shaderSource(shader, source);
+            gl.compileShader(shader);
+            if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+              throw new Error(
+                'shader compile error: ' + gl.getShaderInfoLog(shader)
+              );
+            }
+            return shader;
+          }
+        }
+        class Texture {
+          gl;
+          texture;
+          format;
+          type;
+          frameBuffer = null;
+          width;
+          height;
+          constructor(gl, width, height) {
+            this.gl = gl;
+            this.format = gl.RGBA;
+            this.type = gl.UNSIGNED_BYTE;
+            this.width = width;
+            this.height = height;
+            this.texture = gl.createTexture();
+            gl.bindTexture(gl.TEXTURE_2D, this.texture);
+            gl.texParameteri(
+              gl.TEXTURE_2D,
+              gl.TEXTURE_WRAP_S,
+              gl.CLAMP_TO_EDGE
+            );
+            gl.texParameteri(
+              gl.TEXTURE_2D,
+              gl.TEXTURE_WRAP_T,
+              gl.CLAMP_TO_EDGE
+            );
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+            gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+            if (width && height)
+              gl.texImage2D(
+                gl.TEXTURE_2D,
+                0,
+                this.format,
+                width,
+                height,
+                0,
+                this.format,
+                this.type,
+                null
+              );
+          }
+          loadContentsOf(element, width, height) {
+            const { gl } = this;
+            this.width = width ?? element.width;
+            this.height = height ?? element.height;
+            gl.bindTexture(gl.TEXTURE_2D, this.texture);
+            gl.texImage2D(
+              gl.TEXTURE_2D,
+              0,
+              this.format,
+              this.format,
+              this.type,
+              element
+            );
+            gl.viewport(0, 0, this.width, this.height);
+          }
+          use(unit) {
+            const { gl } = this;
+            gl.activeTexture(gl.TEXTURE0 + (unit || 0));
+            gl.bindTexture(gl.TEXTURE_2D, this.texture);
+          }
+          unuse(unit) {
+            const { gl } = this;
+            gl.activeTexture(gl.TEXTURE0 + (unit || 0));
+            gl.bindTexture(gl.TEXTURE_2D, null);
+          }
+          drawTo(callback) {
+            const { gl } = this;
+            this.frameBuffer = this.frameBuffer || gl.createFramebuffer();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, this.frameBuffer);
+            gl.framebufferTexture2D(
+              gl.FRAMEBUFFER,
+              gl.COLOR_ATTACHMENT0,
+              gl.TEXTURE_2D,
+              this.texture,
+              0
+            );
+            if (
+              gl.checkFramebufferStatus(gl.FRAMEBUFFER) !==
+              gl.FRAMEBUFFER_COMPLETE
+            ) {
+              throw new Error('incomplete framebuffer');
+            }
+            gl.viewport(0, 0, this.width, this.height);
+            callback();
+            gl.bindFramebuffer(gl.FRAMEBUFFER, null);
+          }
+          static fromElement(gl, element, width, height) {
+            var texture = new Texture(gl);
+            texture.loadContentsOf(element, width, height);
+            return texture;
+          }
+        }
+        function getPixels(gl, x, y, width, height) {
+          const length = width * height * 4;
+          const row = width * 4;
+          const end = (height - 1) * row;
+          const arr = new Uint8Array(length);
+          const pixels = new Uint8Array(length);
+          gl.readPixels(x, y, width, height, gl.RGBA, gl.UNSIGNED_BYTE, arr);
+          for (let i = 0; i < length; i += row) {
+            pixels.set(arr.subarray(i, i + row), end - i);
+          }
+          return pixels;
+        }
+
+        const vertexSource = `
+                // 一个属性值，将会从缓冲中获取数据
+                attribute vec2 a_position;
+                attribute vec2 a_texCoord;
+                varying vec2 v_texCoord;
+                // 所有着色器都有一个main方法
+                void main() {
+                  // gl_Position 是一个顶点着色器主要设置的变量
+                  gl_Position = vec4(a_position * 2.0 - 1.0, 0.0, 1.0);
+                  // gl_Position = vec4((a_position * 2.0 - 1.0) * vec2(1, -1), 0, 1);
+                  v_texCoord = a_texCoord;
+                }`;
+
+        const hslFragmentSource = `
+      #ifdef GL_ES
+      precision mediump float;
+      #endif
+
+      varying highp vec2 v_texCoord;
+      uniform highp sampler2D sTexture;
+
+      uniform highp float H;
+      uniform highp float S;
+      uniform highp float L;
+      uniform highp float cursorH;
+      uniform highp float cursorS;
+      uniform highp float cursorL;
+      uniform highp float cursorX;
+      uniform highp float cursorY;
+      uniform highp float tolH;
+      uniform highp float tolS;
+      uniform highp float tolL;
+
+      highp vec3 rgb2hsl(highp vec3 rgb) {
+        highp float r = rgb.x;
+        highp float g = rgb.y;
+        highp float b = rgb.z;
+        highp float max = max(r, max(g, b));
+        highp float min = min(r, min(g, b));
+        highp float h;
+        highp float s;
+        highp float l = (max + min) / 2.0;
+        if (max == min) {
+          h = 0.0;
+          s = 0.0;
+        } else {
+          highp float d = max - min;
+          s = l > 0.5 ? d / (2.0 - max - min) : d / (max + min);
+          if (max == r) {
+            h = ((g - b) / d + (g < b ? 6.0 : 0.0)) / 6.0;
+          } else if (max == g) {
+            h = ((b - r) / d + 2.0) / 6.0;
+          } else {
+            h = ((r - g) / d + 4.0) / 6.0;
+          }
+        }
+        return vec3(h, s, l);
+      }
+
+      highp float hue2rgb(highp float f1, highp float f2, highp float hue) {
+          if (hue < 0.0)
+              hue += 1.0;
+          else if (hue > 1.0)
+              hue -= 1.0;
+          highp float res;
+          if ((6.0 * hue) < 1.0)
+              res = f1 + (f2 - f1) * 6.0 * hue;
+          else if ((2.0 * hue) < 1.0)
+              res = f2;
+          else if ((3.0 * hue) < 2.0)
+              res = f1 + (f2 - f1) * ((2.0 / 3.0) - hue) * 6.0;
+          else
+              res = f1;
+          return res;
+      }
+
+      highp vec3 hsl2rgb(highp vec3 hsl) {
+          highp vec3 rgb;
+          if (hsl.y == 0.0) {
+              rgb = vec3(hsl.z);
+          } else {
+              highp float f2;
+              if (hsl.z < 0.5)
+                  f2 = hsl.z * (1.0 + hsl.y);
+              else
+                  f2 = hsl.z + hsl.y - hsl.y * hsl.z;
+              highp float f1 = 2.0 * hsl.z - f2;
+              rgb.r = hue2rgb(f1, f2, hsl.x + (1.0/3.0));
+              rgb.g = hue2rgb(f1, f2, hsl.x);
+              rgb.b = hue2rgb(f1, f2, hsl.x - (1.0/3.0));
+          }
+          return rgb;
+      }
+
+      float dist(vec2 texCoord, vec2 circleCenter) {
+        return sqrt(pow(texCoord.x - circleCenter.x, 2.0) + pow(texCoord.y - circleCenter.y, 2.0));
+      }
+      bool hitCircle(vec2 texCoord, vec2 circleCenter, float r) {
+        if (dist(texCoord, circleCenter) <= r) {
+          return true;
+        }
+        return false;
+      }
+      bool similarColor(vec3 hsl) {
+        if (
+          abs(hsl.x - cursorH) < tolH &&
+          abs(hsl.y - cursorS) < tolS &&
+          abs(hsl.z - cursorL) < tolL
+        ) {
+          return true;
+        }
+        return false;
+      }
+
+      void main() {
+          highp vec4 rgba = texture2D(sTexture, v_texCoord);
+          highp vec3 hsl = rgb2hsl(rgba.xyz);
+          highp vec3 newHSL = vec3(hsl.x, hsl.y, hsl.z);
+
+          if (cursorH < 0.0) {
+            newHSL.x = hsl.x * H;
+          } else {
+            if (similarColor(hsl)) {
+              newHSL.x = hsl.x + (H - cursorH);
+            }
+          }
+
+          if (cursorS < 0.0) {
+            newHSL.y = hsl.y * S;
+          } else {
+            if (similarColor(hsl)) {
+              newHSL.y = hsl.y + (S - cursorS);
+            }
+          }
+
+          if (cursorL < 0.0) {
+            newHSL.z = hsl.z * L;
+          } else {
+            if (similarColor(hsl)) {
+              newHSL.z = hsl.z + (L - cursorL);
+            }
+          }
+
+          if (newHSL.x < 0.0) newHSL.x = newHSL.x + 1.0;
+          else if (newHSL.x > 1.0)  newHSL.x = newHSL.x - 1.0;
+
+          if (newHSL.y < 0.0) newHSL.y = 0.0;
+          else if (newHSL.y > 1.0)  newHSL.y = 1.0;
+
+          if (newHSL.z < 0.0) newHSL.z = 0.0;
+          else if (newHSL.z > 1.0)  newHSL.z = 1.0;
+
+          
+
+          highp vec3 rgb = hsl2rgb(newHSL);
+          gl_FragColor = vec4(rgb, rgba.w);
+      }
+      `;
+
+        let flipShader, hslShader, textureFrame, textureImage;
+        function initWebGL(gl) {
+          flipShader = new Shader(
+            gl,
+            vertexSource,
+            `
+              precision highp float;
+              uniform sampler2D texture;
+              varying vec2 v_texCoord;
+              void main() {
+                  gl_FragColor = texture2D(texture, vec2(v_texCoord.x, 1.0 - v_texCoord.y));
+              }
+            `
+          );
+
+          hslShader = new Shader(gl, vertexSource, hslFragmentSource);
+        }
+
+        new Vue({
+          el: '#app',
+          data() {
+            return {
+              currentFile: {},
+              currentImg: null,
+              cursorHSL: null,
+              colorH: 0,
+              colorS: 0,
+              colorL: 0,
+              zoom: 1,
+              colorsAll: [],
+              colors: [],
+              marks: {
+                0.1: '10%',
+                1: '100%',
+                2: '200%',
+                3: '300%',
+                5: '500%',
+                10: '1000%',
+              },
+
+              dialogVisible: false,
+              tolH: 0.05,
+              tolS: 0.3,
+              tolL: 0.3,
+            };
+          },
+          watch: {
+            zoom(val) {
+              this.viewZoom(val);
+            },
+            cursorHSL(val) {
+              if (val == null) {
+                this.onClearCursorColor();
+              } else {
+                const [h, s, l] = val.match(/\d+/g);
+                cursorH = parseInt(h);
+                cursorS = parseInt(s);
+                cursorL = parseInt(l);
+                noTrigger = true;
+                this.colorH = cursorH;
+                this.colorS = cursorS;
+                this.colorL = cursorL;
+
+                cursorH /= 360;
+                cursorS /= 100;
+                cursorL /= 100;
+
+                this.$nextTick(() => {
+                  noTrigger = false;
+                });
+              }
+            },
+          },
+          mounted() {
+            canvas = document.querySelector('canvas');
+            gl = canvas.getContext('webgl');
+            initWebGL(gl);
+            this.bindEvents();
+            this.resetSlider();
+          },
+          methods: {
+            bindEvents() {
+              const $view = document.getElementById('view');
+              const $img = $view.querySelector('.img');
+              $view.addEventListener('mousewheel', (e) => {
+                if (e.ctrlKey) {
+                  e.preventDefault();
+
+                  let zoom = parseFloat(getComputedStyle($img).zoom);
+                  if (e.deltaY < 0) {
+                    zoom += 0.1;
+                  } else {
+                    zoom = Math.max(0.1, zoom - 0.1);
+                  }
+                  this.viewZoom(zoom);
+                }
+              });
+
+              let spaceDown = false;
+              document.addEventListener('keydown', (e) => {
+                switch (e.key) {
+                  case ' ':
+                    e.preventDefault();
+
+                    if (!spaceDown) {
+                      spaceDown = true;
+                      canvas.style.cursor = 'grab';
+                    }
+                    break;
+                  case '0':
+                    if (e.ctrlKey) {
+                      this.viewZoom(1);
+                    }
+                    break;
+                }
+              });
+              document.addEventListener('keyup', (e) => {
+                spaceDown = false;
+                if (!moveStart) {
+                  canvas.style.cursor = '';
+                }
+              });
+
+              let moveStart = false;
+              let startPos = {};
+              $view.addEventListener(
+                'mousedown',
+                (e) => {
+                  if (spaceDown) {
+                    e.stopPropagation();
+                    moveStart = true;
+                    startPos = {
+                      x: $view.scrollLeft + e.x,
+                      y: $view.scrollTop + e.y,
+                    };
+                    canvas.style.cursor = 'grabbing';
+                  }
+                },
+                true
+              );
+              document.addEventListener('mousemove', (e) => {
+                if (moveStart) {
+                  $view.scrollLeft = startPos.x - e.x;
+                  $view.scrollTop = startPos.y - e.y;
+                } else if (pickerColorMode) {
+                  this.pickerCursorColor(e);
+                }
+              });
+              document.addEventListener('mouseup', (e) => {
+                moveStart = false;
+                pickerColorMode = false;
+                canvas.style.cursor = spaceDown ? 'grab' : '';
+              });
+
+              let pickerColorMode = false;
+              canvas.addEventListener('mousedown', (e) => {
+                pickerColorMode = true;
+                this.pickerCursorColor(e);
+              });
+            },
+            formatP(val) {
+              return Math.round(val * 100) + '%';
+            },
+            viewZoom(zoom) {
+              this.zoom = zoom;
+              const $view = document.getElementById('view');
+              const $img = $view.querySelector('.img');
+
+              $img.style.zoom = zoom;
+
+              $view.scrollLeft = ($view.scrollWidth - $view.clientWidth) / 2;
+              $view.scrollTop = ($view.scrollHeight - $view.clientHeight) / 2;
+            },
+            render(img) {
+              const start = Date.now();
+
+              const $view = document.getElementById('view');
+              this.viewZoom(Math.min(1, ($view.clientWidth - 10) / img.width));
+
+              canvas.width = img.width;
+              canvas.height = img.height;
+              // ctx.drawImage(img, 0, 0);
+
+              textureFrame = new Texture(gl, canvas.width, canvas.height);
+              textureImage = Texture.fromElement(gl, img);
+
+              textureImage.use();
+              // hslShader
+              //   .uniforms({ H: 1, S: 1, L: 1, cursorH, cursorS, cursorL })
+              //   .drawRect();
+              flipShader.drawRect();
+
+              imgData = getPixels(gl, 0, 0, canvas.width, canvas.height);
+              // hslData = this.getImageHSLData();
+
+              console.log('[OPEN] ElapsedTime:', Date.now() - start);
+            },
+            getImageHSLData() {
+              // imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              if (!imgData) {
+                return;
+              }
+              const data = imgData;
+
+              const huv = {};
+              const huvMap = [
+                '红色',
+                '橙色',
+                '黄色',
+                '黄绿色',
+                '绿色',
+                '蓝绿色',
+                '青色',
+                '蓝色',
+                '蓝紫色',
+                '紫色',
+                '粉紫色',
+                '品红',
+                '白色',
+                '黑色',
+                '灰色',
+              ];
+              const grid = 360 / 12;
+
+              const hslData = [];
+              let r, g, b;
+              for (var i = 0; i < data.length; i += 4) {
+                if (data[i + 3] == 0) {
+                  r = g = b = 255;
+                } else {
+                  r = data[i];
+                  g = data[i + 1];
+                  b = data[i + 2];
+                }
+                const hsl = rgbToHsl(r, g, b);
+                hslData.push(hsl);
+
+                let idx;
+                let h = hsl.h;
+                // 白色，亮度>=95%
+                if (hsl.l >= 95) {
+                  idx = 12;
+                  // 黑色，亮度<=5%
+                } else if (hsl.l <= 5) {
+                  idx = 13;
+                  // 灰色，饱和度<=5%
+                } else if (hsl.s <= 5) {
+                  idx = 14;
+                  // 彩色
+                } else if (hsl.s > 25 && hsl.l > 25 && hsl.l < 75) {
+                  h = hsl.h + grid / 2;
+                  h = h >= 1 ? h - 1 : h;
+                  idx = Math.floor(h / grid);
+                }
+
+                if (idx !== undefined) {
+                  huv[idx] = huv[idx] || { h: [], s: [], l: [] };
+                  huv[idx].h.push(h);
+                  huv[idx].s.push(hsl.s);
+                  huv[idx].l.push(hsl.l);
+                }
+              }
+
+              const pixelCount = data.length / 4;
+              let colors = Object.keys(huv).map((idx) => {
+                const hsl = {
+                  index: Number(idx),
+                  color: huvMap[Number(idx)],
+                  ratio:
+                    Math.ceil((huv[idx].h.length / pixelCount) * 1000) / 10,
+                  count: huv[idx].h.length,
+                  h:
+                    huv[idx].h.reduce((n, m) => n + m) / huv[idx].h.length -
+                    grid / 2,
+                  s: huv[idx].s.reduce((n, m) => n + m) / huv[idx].s.length,
+                  l: huv[idx].l.reduce((n, m) => n + m) / huv[idx].l.length,
+                };
+                return Object.assign(hsl, hslToRgb(hsl.h, hsl.s, 50));
+              });
+              // console.log(colors);
+              colors.sort((x, y) => y.ratio - x.ratio);
+              this.colorsAll = JSON.parse(JSON.stringify(colors));
+
+              colors = colors.filter(
+                (item) => item.ratio >= 1 && item.index < 12
+              );
+              // console.log('过滤1%', colors);
+              this.colors = JSON.parse(JSON.stringify(colors));
+
+              return hslData;
+            },
+            pickerCursorColor(e) {
+              if (!imgData) {
+                return;
+              }
+
+              const x = Math.round(e.offsetX / this.zoom);
+              const y = Math.round(e.offsetY / this.zoom);
+              const idx = y * canvas.width + x;
+              // console.log(x, y, idx);
+
+              let r = imgData[idx * 4];
+              let g = imgData[idx * 4 + 1];
+              let b = imgData[idx * 4 + 2];
+              const { h, s, l } = rgbToHsl(r, g, b);
+              this.cursorHSL = `hsl(${h}, ${s}%, ${l}%)`;
+            },
+            colorTransform() {
+              const start = Date.now();
+
+              if (!imgData) {
+                return;
+              }
+
+              textureImage.use();
+              textureFrame.drawTo(() => {
+                hslShader
+                  .uniforms({
+                    H: this.colorH / (cursorH < 0 ? 180 : 360),
+                    S: this.colorS / (cursorS < 0 ? 50 : 100),
+                    L: this.colorL / (cursorL < 0 ? 50 : 100),
+                    cursorH,
+                    cursorS,
+                    cursorL,
+                    tolH: this.tolH,
+                    tolS: this.tolS,
+                    tolL: this.tolL,
+                  })
+                  .drawRect();
+              });
+
+              textureFrame.use();
+              flipShader.drawRect();
+
+              // const similarColor = (h, s, l) => {
+              //   return (
+              //     Math.abs(h - cursorH) / 360 <= this.tolH &&
+              //     Math.abs(s - cursorS) / 100 <= this.tolS &&
+              //     Math.abs(l - cursorL) / 100 <= this.tolL
+              //   );
+              // };
+
+              // const data = new Uint8ClampedArray(hslData.length * 4);
+              // for (let i = 0; i < hslData.length; i++) {
+              //   let { h, s, l } = hslData[i];
+              //   let newH = h,
+              //     newS = s,
+              //     newL = l;
+              //   if (cursorH) {
+              //     if (similarColor(h, s, l)) {
+              //       newH = h + (this.colorH - cursorH);
+              //     }
+              //   } else {
+              //     newH = h * (this.colorH / 180);
+              //   }
+
+              //   if (cursorS) {
+              //     if (similarColor(h, s, l)) {
+              //       newS = this.colorS;
+              //     }
+              //   } else {
+              //     newS = s * (this.colorS / 50);
+              //   }
+
+              //   if (cursorL) {
+              //     if (similarColor(h, s, l)) {
+              //       newL = this.colorL;
+              //     }
+              //   } else {
+              //     newL = l * (this.colorL / 50);
+              //   }
+
+              //   let { r, g, b } = hslToRgb(newH, newS, newL);
+              //   data[i * 4 + 0] = r;
+              //   data[i * 4 + 1] = g;
+              //   data[i * 4 + 2] = b;
+              //   data[i * 4 + 3] = imgData.data[i * 4 + 3];
+              // }
+
+              // const newImgData = new ImageData(
+              //   data,
+              //   canvas.width,
+              //   canvas.height
+              // );
+              // ctx.putImageData(newImgData, 0, 0);
+
+              console.log('[COLOR] ElapsedTime:', Date.now() - start);
+            },
+
+            resetSlider() {
+              this.colorH = 180;
+              this.colorS = this.colorL = 50;
+            },
+            resetTol() {
+              this.tolH = 0.05;
+              this.tolS = 0.3;
+              this.tolL = 0.3;
+            },
+            onOpenImage({ raw: file }) {
+              this.currentFile = file;
+              const url = createBlobURL(file);
+
+              var image = new Image();
+              image.onload = () => {
+                this.currentImg = image;
+                this.resetSlider();
+                this.render(image);
+              };
+              image.onerror = () => {
+                this.currentImg = null;
+              };
+              image.src = url;
+            },
+            onSaveImage() {
+              canvas.toBlob(
+                (blob) => {
+                  saveAs(blob, this.currentFile.name);
+                },
+                this.currentFile.type || 'image/jpeg',
+                80
+              );
+            },
+            onClearCursorColor() {
+              cursorH = cursorS = colorL = -0.1;
+              this.cursorHSL = null;
+              this.resetSlider();
+            },
+            onColorTransform() {
+              if (noTrigger) {
+                return;
+              }
+              throttle(this.colorTransform, 50)();
+            },
+          },
+        });
+      })();
+    </script>
+  </body>
+</html>
