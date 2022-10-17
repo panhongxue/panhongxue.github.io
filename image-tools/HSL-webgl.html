@@ -73,6 +73,7 @@
       .status > * {
         /* border-left: 1px solid #666; */
         margin-right: 24px;
+        white-space: nowrap;
       }
       .status .zoom {
         display: flex;
@@ -297,7 +298,12 @@
           </div>
         </div>
       </div>
-      <el-dialog title="容差" :visible.sync="dialogVisible" width="30%">
+      <el-dialog
+        title="容差"
+        :visible.sync="dialogVisible"
+        :close-on-click-modal="false"
+        width="30%"
+      >
         <div>
           <div>
             <label>H:</label>
@@ -969,7 +975,7 @@
           },
           mounted() {
             canvas = document.querySelector('canvas');
-            gl = canvas.getContext('webgl');
+            gl = canvas.getContext('webgl', { preserveDrawingBuffer: true });
             initWebGL(gl);
             this.bindEvents();
             this.resetSlider();
@@ -1071,7 +1077,7 @@
               const start = Date.now();
 
               const $view = document.getElementById('view');
-              this.viewZoom(Math.min(1, ($view.clientWidth - 10) / img.width));
+              this.viewZoom(Math.min(1, $view.clientHeight / img.height));
 
               canvas.width = img.width;
               canvas.height = img.height;
@@ -1317,7 +1323,7 @@
               );
             },
             onClearCursorColor() {
-              cursorH = cursorS = colorL = -0.1;
+              cursorH = cursorS = cursorL = -0.1;
               this.cursorHSL = null;
               this.resetSlider();
             },

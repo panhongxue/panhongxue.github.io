@@ -73,6 +73,7 @@
       .status > * {
         /* border-left: 1px solid #666; */
         margin-right: 24px;
+        white-space: nowrap;
       }
       .status .zoom {
         display: flex;
@@ -296,7 +297,12 @@
           </div>
         </div>
       </div>
-      <el-dialog title="容差" :visible.sync="dialogVisible" width="30%">
+      <el-dialog
+        title="容差"
+        :visible.sync="dialogVisible"
+        :close-on-click-modal="false"
+        width="30%"
+      >
         <div>
           <div>
             <label>H:</label>
@@ -492,6 +498,8 @@
                 cursorL = parseInt(l);
                 noTrigger = true;
                 this.colorH = cursorH;
+                this.colorS = cursorS;
+                this.colorL = cursorL;
                 this.$nextTick(() => {
                   noTrigger = false;
                 });
@@ -601,7 +609,8 @@
               const start = Date.now();
 
               const $view = document.getElementById('view');
-              this.viewZoom(Math.min(1, ($view.clientWidth - 10) / img.width));
+              // this.viewZoom(Math.min(1, ($view.clientWidth - 10) / img.width));
+              this.viewZoom(Math.min(1, $view.clientHeight / img.height));
 
               canvas.width = img.width;
               canvas.height = img.height;
@@ -749,7 +758,7 @@
 
                 if (cursorS) {
                   if (similarColor(h, s, l)) {
-                    newS = this.colorS;
+                    newS = s + (this.colorS - cursorS);
                   }
                 } else {
                   newS = s * (this.colorS / 50);
@@ -757,7 +766,7 @@
 
                 if (cursorL) {
                   if (similarColor(h, s, l)) {
-                    newL = this.colorL;
+                    newL = l + (this.colorL - cursorL);
                   }
                 } else {
                   newL = l * (this.colorL / 50);
@@ -814,7 +823,7 @@
               );
             },
             onClearCursorColor() {
-              cursorH = cursorS = colorL = null;
+              cursorH = cursorS = cursorL = null;
               this.cursorHSL = null;
               this.resetSlider();
             },
