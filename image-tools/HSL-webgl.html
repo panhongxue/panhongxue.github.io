@@ -247,7 +247,7 @@
                   v-model="colorH"
                   :max="360"
                   class="slider-hue"
-                  show-input
+                  :show-input="!isMobile"
                   @input="onColorTransform"
                 />
               </div>
@@ -257,7 +257,7 @@
               <div>
                 <el-slider
                   v-model="colorL"
-                  show-input
+                  :show-input="!isMobile"
                   @input="onColorTransform"
                 />
               </div>
@@ -267,7 +267,7 @@
               <div>
                 <el-slider
                   v-model="colorS"
-                  show-input
+                  :show-input="!isMobile"
                   @input="onColorTransform"
                 />
               </div>
@@ -945,6 +945,11 @@
               tolS: 0.3,
               tolL: 0.3,
             };
+          },
+          computed: {
+            isMobile() {
+              return navigator.userAgent.includes('Mobile');
+            },
           },
           watch: {
             zoom(val) {
