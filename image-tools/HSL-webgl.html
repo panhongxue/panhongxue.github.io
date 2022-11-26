@@ -1053,22 +1053,22 @@
 
                 let idx
                 let h = hsl.h
-                // 透明
                 if (data[i + 3] == 0) {
+                  // 透明
                   idx = 15
-                  // 白色，亮度>=95%
-                } else if (hsl.l >= 98) {
+                } else if (hsl.l >= 95) {
+                  // 白色
                   idx = 12
-                  // 黑色，亮度<=5%
-                } else if (hsl.l <= 3) {
+                } else if (hsl.l <= 5) {
+                  // 黑色
                   idx = 13
-                  // 灰色，饱和度<=5%
                 } else if (hsl.s <= 5) {
+                  // 灰色，饱和度<=5%
                   idx = 14
                   // 彩色
                 } else if (hsl.s >= 25 && hsl.l >= 10 && hsl.l <= 90) {
                   h = hsl.h + grid / 2
-                  h = h >= 1 ? h - 1 : h
+                  h = h >= 360 ? h - 360 : h
                   idx = Math.floor(h / grid)
                 }
 
