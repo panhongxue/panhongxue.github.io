@@ -680,6 +680,9 @@
                   s: huv[idx].s.reduce((n, m) => n + m) / huv[idx].s.length,
                   l: huv[idx].l.reduce((n, m) => n + m) / huv[idx].l.length,
                 }
+                if (hsl.h < 0) {
+                  hsl.h += 360
+                }
                 return Object.assign(hsl, hslToRgb(hsl.h, hsl.s, 50))
               })
               // console.log(colors);
