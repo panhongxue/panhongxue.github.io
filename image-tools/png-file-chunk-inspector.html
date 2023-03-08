@@ -366,7 +366,7 @@
         article table p {
           margin: 0em;
         }
-        article table p + p {
+        article table p {
           margin-top: 0.5em;
         }
         article table td,
@@ -1116,7 +1116,7 @@
                       if (list == part.errorNotes)
                         table.classList.add('errors');
                       var li = appendElem(ul, 'li');
-                      if (typeof item == 'string') li.textContent = item;
+                      if (typeof item == 'string') li.innerHTML = item;
                       else if (item instanceof Node) li.appendChild(item);
                       else throw new Error('Assertion error');
                     }
@@ -2833,6 +2833,7 @@
                         var text = decodeIso8859_1(
                           data.slice(separatorIndex + 1)
                         );
+                        text = text.replace(/\n.+/gm, ($0) => `<p>${$0}</p>`);
                         chunk.innerNotes.push('Text string: '.concat(text));
                         if (text.indexOf('\u0000') != -1)
                           chunk.errorNotes.push(
