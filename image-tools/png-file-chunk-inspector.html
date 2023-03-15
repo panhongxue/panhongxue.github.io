@@ -994,79 +994,79 @@
                   }
                 }
 
-                const totalLen = imageDataArr.reduce(
-                  (prev, cur) => prev + cur.length,
-                  0
-                );
-                const totalImageData = new Uint8Array(totalLen);
-                let offset = 0;
-                imageDataArr.forEach((item) => {
-                  totalImageData.set(item, offset);
-                  offset += item.length;
-                });
-                console.log('--ori--', totalImageData);
+                // const totalLen = imageDataArr.reduce(
+                //   (prev, cur) => prev + cur.length,
+                //   0
+                // );
+                // const totalImageData = new Uint8Array(totalLen);
+                // let offset = 0;
+                // imageDataArr.forEach((item) => {
+                //   totalImageData.set(item, offset);
+                //   offset += item.length;
+                // });
+                // console.log('--ori--', totalImageData);
 
-                // const unzip = deflate.decompressZlib(totalImageData);
-                const unzip = pako.inflate(totalImageData);
-                console.log(
-                  '--gzip--',
-                  pako.deflate(unzip, {
-                    level: 9,
-                    memLevel: 9,
-                    windowBits: 15,
-                    strategy: 0,
-                    // dictionary: gzipDICT,
-                  })
-                );
-                console.log('--ungzip--', unzip);
+                // // const unzip = deflate.decompressZlib(totalImageData);
+                // const unzip = pako.inflate(totalImageData);
+                // console.log(
+                //   '--gzip--',
+                //   pako.deflate(unzip, {
+                //     level: 9,
+                //     memLevel: 9,
+                //     windowBits: 15,
+                //     strategy: 0,
+                //     // dictionary: gzipDICT,
+                //   })
+                // );
+                // console.log('--ungzip--', unzip);
 
-                const colorsMap = {};
-                unzip.forEach((colorIdx) => {
-                  // console.log(colorIdx);
-                  if (colorsMap[colorIdx] == undefined) {
-                    colorsMap[colorIdx] = 1;
-                  } else {
-                    colorsMap[colorIdx]++;
-                  }
-                });
-                let colorsList = [];
-                for (let k in colorsMap) {
-                  k = parseInt(k);
-                  colorsList[k] = {
-                    index: k,
-                    count: colorsMap[k],
-                  };
-                }
-                const arr1 = colorsList
-                  .slice(0, transparency)
-                  .sort((x, y) => y.count - x.count);
-                const arr2 = colorsList
-                  .slice(transparency)
-                  .sort((x, y) => y.count - x.count);
-                colorsList = [...arr1, ...arr2];
-                // colorsList.sort((x, y) => y.count - x.count);
-                const sortColorTab = {};
-                colorsList.forEach((c, i) => {
-                  sortColorTab[c?.index] = i;
-                });
+                // const colorsMap = {};
+                // unzip.forEach((colorIdx) => {
+                //   // console.log(colorIdx);
+                //   if (colorsMap[colorIdx] == undefined) {
+                //     colorsMap[colorIdx] = 1;
+                //   } else {
+                //     colorsMap[colorIdx]++;
+                //   }
+                // });
+                // let colorsList = [];
+                // for (let k in colorsMap) {
+                //   k = parseInt(k);
+                //   colorsList[k] = {
+                //     index: k,
+                //     count: colorsMap[k],
+                //   };
+                // }
+                // const arr1 = colorsList
+                //   .slice(0, transparency)
+                //   .sort((x, y) => y.count - x.count);
+                // const arr2 = colorsList
+                //   .slice(transparency)
+                //   .sort((x, y) => y.count - x.count);
+                // colorsList = [...arr1, ...arr2];
+                // // colorsList.sort((x, y) => y.count - x.count);
+                // const sortColorTab = {};
+                // colorsList.forEach((c, i) => {
+                //   sortColorTab[c?.index] = i;
+                // });
 
-                console.log(colorsList);
+                // console.log(colorsList);
 
-                const unzip2 = unzip.map((byte) => {
-                  return sortColorTab[byte];
-                });
+                // const unzip2 = unzip.map((byte) => {
+                //   return sortColorTab[byte];
+                // });
 
-                console.log(unzip2);
-                console.log(
-                  '--gzip--',
-                  pako.deflate(unzip2, {
-                    level: 9,
-                    memLevel: 9,
-                    windowBits: 15,
-                    strategy: 0,
-                    // dictionary: gzipDICT,
-                  })
-                );
+                // console.log(unzip2);
+                // console.log(
+                //   '--gzip--',
+                //   pako.deflate(unzip2, {
+                //     level: 9,
+                //     memLevel: 9,
+                //     windowBits: 15,
+                //     strategy: 0,
+                //     // dictionary: gzipDICT,
+                //   })
+                // );
 
                 requireType(
                   document.querySelector('article span#summary'),
