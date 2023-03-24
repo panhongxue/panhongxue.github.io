@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SortableJS</title>
+    <style>
+      :root {
+        --icon-size: 60px;
+        --icon-max-width: 1350px;
+        --icon-gap-x: 30px;
+        --icon-gap-y: 30px;
+      }
+      .container {
+        max-width: 1350px;
+        margin: auto;
+      }
+
+      .grid {
+        display: grid;
+        justify-content: center;
+        grid-template-columns: repeat(auto-fill, var(--icon-size));
+        grid-template-rows: repeat(auto-fill, var(--icon-size));
+        grid-auto-flow: dense;
+        grid-gap: var(--icon-gap-x) var(--icon-gap-y);
+      }
+      .grid-item {
+        width: var(--icon-size);
+        height: var(--icon-size);
+      }
+      .icon-size-1x2 {
+        grid-column: span 2;
+        width: calc(var(--icon-size) * 2 + var(--icon-gap-y) * 1);
+        height: var(--icon-size);
+      }
+
+      .icon-size-2x1 {
+        grid-row: span 2;
+        width: var(--icon-size);
+        height: calc(var(--icon-size) * 2 + var(--icon-gap-x) * 1);
+      }
+
+      .icon-size-2x2,
+      .icon-size-small {
+        grid-column: span 2;
+        grid-row: span 2;
+        width: calc(var(--icon-size) * 2 + var(--icon-gap-y));
+        height: calc(var(--icon-size) * 2 + var(--icon-gap-x));
+      }
+
+      .icon-size-2x4,
+      .icon-size-medium {
+        grid-column: span 4;
+        grid-row: span 2;
+        width: calc(var(--icon-size) * 4 + var(--icon-gap-y) * 3);
+        height: calc(var(--icon-size) * 2 + var(--icon-gap-x));
+      }
+
+      .icon {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+        border-radius: 10px;
+        background-color: #ccc;
+        font-size: 24px;
+      }
+      .title {
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div id="grid" class="grid">
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 1</div>
+        </div>
+        <div class="grid-item icon-size-1x2">
+          <div class="icon">1x2</div>
+          <div class="title">Icon 2</div>
+        </div>
+        <div class="grid-item icon-size-2x1">
+          <div class="icon">2x1</div>
+          <div class="title">Icon 3</div>
+        </div>
+        <div class="grid-item icon-size-2x2">
+          <div class="icon">2x2</div>
+          <div class="title">Icon 4</div>
+        </div>
+        <div class="grid-item icon-size-2x4">
+          <div class="icon">2x4</div>
+          <div class="title">Icon 5</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 6</div>
+        </div>
+        <div class="grid-item icon-size-2x4">
+          <div class="icon">2x4</div>
+          <div class="title">Icon 7</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 8</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 9</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 10</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 11</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 12</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 13</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 14</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 15</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 16</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 17</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 18</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 19</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 20</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 21</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 22</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 23</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 24</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 25</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 26</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 27</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 28</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 29</div>
+        </div>
+        <div class="grid-item icon-size-1x1">
+          <div class="icon">1x1</div>
+          <div class="title">Icon 30</div>
+        </div>
+      </div>
+    </div>
+    <script src="./js/Sortable.js"></script>
+    <script>
+      new Sortable(document.getElementById('grid'), {
+        animation: 250,
+        ghostClass: 'blue-background-class',
+      })
+    </script>
+  </body>
+</html>
