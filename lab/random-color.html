@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Random Color</title>
+    <style>
+      .wrap {
+        width: 1000px;
+        margin: auto;
+      }
+      .wrap > div {
+        border: 1px solid #ccc;
+        padding: 10px;
+        margin: 10px;
+      }
+      i {
+        display: inline-block;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        margin: 0 5px 5px 0;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h3>随机HSL</h3>
+      <div id="colors1"></div>
+      <h3>随机RGB</h3>
+      <div id="colors2"></div>
+    </div>
+    <script>
+      function randomColorRGB() {
+        const r = Math.floor(Math.random() * 256);
+        const g = Math.floor(Math.random() * 150);
+        const b = Math.floor(Math.random() * 125);
+
+        return (
+          '#' +
+          r.toString(16).padStart(2, '0') +
+          g.toString(16).padStart(2, '0') +
+          b.toString(16).padStart(2, '0')
+        );
+      }
+
+      function randomColorHSL() {
+        const h = Math.floor(Math.random() * 360);
+        const s = 100;
+        const l = 80 + Math.floor(Math.random() * 20);
+
+        const { r, g, b } = hslToRgb(h, s, l);
+
+        return (
+          '#' +
+          r.toString(16).padStart(2, '0') +
+          g.toString(16).padStart(2, '0') +
+          b.toString(16).padStart(2, '0')
+        );
+      }
+
+      function hslToRgb(h, s, l) {
+        var r, g, b;
+
+        h = h / 360;
+        s = s / 100;
+        l = l / 100;
+
+        if (s == 0) {
+          r = g = b = l; // achromatic
+        } else {
+          var hue2rgb = function hue2rgb(p, q, t) {
+            if (t < 0) t += 1;
+            if (t > 1) t -= 1;
+            if (t < 1 / 6) return p + (q - p) * 6 * t;
+            if (t < 1 / 2) return q;
+            if (t < 2 / 3) return p + (q - p) * (2 / 3 - t) * 6;
+            return p;
+          };
+
+          var q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+          var p = 2 * l - q;
+          r = hue2rgb(p, q, h + 1 / 3);
+          g = hue2rgb(p, q, h);
+          b = hue2rgb(p, q, h - 1 / 3);
+        }
+
+        return {
+          r: Math.round(r * 255),
+          g: Math.round(g * 255),
+          b: Math.round(b * 255),
+        };
+      }
+
+      function main() {
+        for (var i = 0; i < 105; i++) {
+          const colorEle = document.createElement('i');
+          colorEle.style.backgroundColor = randomColorRGB();
+          colors1.appendChild(colorEle);
+        }
+
+        for (var i = 0; i < 105; i++) {
+          const colorEle = document.createElement('i');
+          colorEle.style.backgroundColor = randomColorHSL();
+          colors2.appendChild(colorEle);
+        }
+      }
+
+      main();
+      console.log(randomColor1());
+    </script>
+  </body>
+</html>
